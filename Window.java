@@ -1,3 +1,5 @@
+import Assets.Assets;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
@@ -16,6 +18,12 @@ public class Window extends JFrame implements Runnable {
     private double targetTime = 1000000000/fps;
     private double delta = 0;
     private int averagefps = fps;
+
+    //Cargar Sprites
+    private int index = 0;
+    private long lastTime = System.currentTimeMillis();
+    private long delay = 100; // Cambiar frame cada 100ms
+
 
     public Window() {
 
@@ -43,12 +51,20 @@ public class Window extends JFrame implements Runnable {
 
     }
 
-    int x = 0;
     private void update() {
+        if(System.currentTimeMillis() - lastTime > delay) {
+            index++;
+            if(index >= Assets.monaIdle.length) { //Carga de 0 el Sprite de monaIdle
+                index = 0;
+            }
 
-        x++;
-
+            if(index >= Assets.monaWalk.length) { //Carga de 0 el Sprite de monaWalk
+                index = 0;
+            }
+            lastTime = System.currentTimeMillis();
+        }
     }
+
 
     private void draw() {
 
@@ -60,16 +76,23 @@ public class Window extends JFrame implements Runnable {
         }
         g = bs.getDrawGraphics();
         //--------------------Dibujo-----------------------
-        g.clearRect(0, 0, W, H);
-        g.drawRect(x, 0, 50, 50);
+
+        g.setColor(Color.WHITE);
+        g.fillRect(0, 0, W, H);
+        g.drawImage(Assets.monaIdle[index], 100, 100, null); // Dibuja frame actual del Sprite
+        g.drawImage(Assets.monaWalk[index], 200, 200, null);
         g.drawString("FPS: " + averagefps, 10, 10);
-        g.setColor(Color.RED);
 
         //-------------------------------------------------
 
         g.dispose();
         bs.show();
 
+    }
+
+
+    private void init(){
+        Assets.init();
     }
 
     @Override
@@ -79,6 +102,8 @@ public class Window extends JFrame implements Runnable {
         long lastTime = System.nanoTime();
         int frames = 0;
         int time = 0;
+
+        init();
 
         while (running) {
             now = System.nanoTime();
@@ -91,7 +116,7 @@ public class Window extends JFrame implements Runnable {
                 draw();
                 delta--;
                 frames++;
-                System.out.println("FPS: " + frames);
+//                System.out.println("FPS: " + frames);
             }
             if (time >= 1000000000) {
                 averagefps = frames;
