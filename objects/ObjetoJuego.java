@@ -1,3 +1,5 @@
+package objects;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
@@ -5,11 +7,11 @@ public abstract class ObjetoJuego {
     protected BufferedImage texture;
     protected Vector2D posicion;
 
-    public ObjetoJuego(Vector2D texture, BufferedImage[] posicion) {
-        texture = texture;
-
-
+    public ObjetoJuego(Vector2D posicion, BufferedImage[] texture) {
+        this.posicion = posicion;
+        this.texture = texture[0]; // Usamos el primer sprite como textura inicial
     }
+
     public abstract void update();
     public abstract void draw(Graphics g);
 

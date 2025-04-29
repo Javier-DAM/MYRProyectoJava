@@ -1,16 +1,20 @@
 import Assets.Assets;
+import input.Teclado;
+import objects.GameState;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
 import java.awt.image.BufferStrategy;
 
 public class Window extends JFrame implements Runnable {
+    JFrame frame = new JFrame();
 
-    public static final int W = 800, H = 600;
+    public static final int W = 1920, H = 1080;
     private Canvas canvas;
     private Thread thread;
     private boolean running = false;
-
+    private Teclado teclado;
     private BufferStrategy bs;
     private Graphics g;
 
@@ -24,13 +28,15 @@ public class Window extends JFrame implements Runnable {
     private long lastTime = System.currentTimeMillis();
     private long delay = 100; // Cambiar frame cada 100ms
 
+    private GameState gameState;
+
 
     public Window() {
-
-        setTitle("RSG");
-        setSize(W, H);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
+        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);// Para ampliar la pantalla
+        setTitle("RSG");//titulo
+        setSize(W, H);//Pongo el tamaño de la ventana
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//Para que al cerrar la ventana se termine la ejecución del progrma
+        setResizable(true);
         setLocationRelativeTo(null);
         setVisible(true);
 
@@ -40,8 +46,10 @@ public class Window extends JFrame implements Runnable {
         canvas.setMaximumSize(new Dimension(W, H));
         canvas.setMinimumSize(new Dimension(W, H));
         canvas.setFocusable(true);
+        teclado  = new Teclado();
 
         add(canvas);
+        canvas.addKeyListener(teclado);
 
     }
 
@@ -52,6 +60,13 @@ public class Window extends JFrame implements Runnable {
     }
 
     private void update() {
+
+        teclado.update();
+        gameState.update();
+
+
+
+
         if(System.currentTimeMillis() - lastTime > delay) {
             index++;
             if(index >= Assets.monaIdle.length) { //Carga de 0 el Sprite de monaIdle
@@ -79,9 +94,10 @@ public class Window extends JFrame implements Runnable {
 
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, W, H);
-        g.drawImage(Assets.monaIdle[index], 100, 100, null); // Dibuja frame actual del Sprite
-        g.drawImage(Assets.monaWalk[index], 200, 200, null);
+      //  g.drawImage(Assets.monaIdle[index], 100, 100, null); // Dibuja frame actual del Sprite
+       // g.drawImage(Assets.monaWalk[index], 200, 200, null);
         g.drawString("FPS: " + averagefps, 10, 10);
+        gameState.draw(g);
 
         //-------------------------------------------------
 
@@ -93,6 +109,7 @@ public class Window extends JFrame implements Runnable {
 
     private void init(){
         Assets.init();
+        gameState = new GameState();
     }
 
     @Override
