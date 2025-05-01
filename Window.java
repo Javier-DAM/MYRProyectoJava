@@ -30,7 +30,17 @@ public class Window extends JFrame implements Runnable {
     private GameState gameState;
     private Jugador jugador;
 
-    private boolean caminando = true, horientacion = true;
+    private boolean caminando, orientacion, atacando, bloqueando;
+
+    //Delay tras pulsar hacer el ataque (J)
+    private int attackIndex = 0;
+    private long attackLastTime = 0;
+    private boolean isAttacking = false;
+    private int attackDelay = 100; // milisegundos por frame
+
+    //Al pusar Bloqueo (K)
+    private boolean isBlocking = false;
+
 
     public Window() {
         setTitle("RSG");
@@ -55,25 +65,57 @@ public class Window extends JFrame implements Runnable {
         new Window().start();
     }
 
+    private int walkIndex = 0;
+    private int idleIndex = 0;
+
     private void update() {
         teclado.update();
         jugador.update();
         gameState.update();
 
-        if (System.currentTimeMillis() - lastTime > delay) {
-            index++;
+        long currentTime = System.currentTimeMillis();
 
-            if (index >= Assets.monaIdle.length) {
-                index = 0;
+        // Prioridad: Atacar > Bloquear > Caminar > Idle
+        if (Teclado.atacar) {
+            if (!isAttacking) {
+                isAttacking = true;
+                attackIndex = 0;
+                attackLastTime = currentTime;
             }
-
-            if (index >= Assets.monaWalk.length) {
-                index = 0;
+        } else if (Teclado.bloquear) {
+            isBlocking = true;
+            isAttacking = false;
+        } else {
+            isBlocking = false;
+            if (!Teclado.atacar) {
+                isAttacking = false;
+                attackIndex = 0;
             }
+        }
 
-            lastTime = System.currentTimeMillis();
+        if (isAttacking && currentTime - attackLastTime > attackDelay) {
+            attackIndex++;
+            if (attackIndex >= Assets.monaAttack.length) {
+                isAttacking = false;
+                attackIndex = 0;
+            }
+            attackLastTime = currentTime;
+        }
+
+        if (currentTime - lastTime > delay) {
+            if (!isAttacking && !isBlocking) {
+                if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
+                    walkIndex++;
+                    if (walkIndex >= Assets.monaWalk.length) walkIndex = 0;
+                } else {
+                    idleIndex++;
+                    if (idleIndex >= Assets.monaIdle.length) idleIndex = 0;
+                }
+            }
+            lastTime = currentTime;
         }
     }
+
 
     private void draw() {
         bs = canvas.getBufferStrategy();
@@ -95,24 +137,55 @@ public class Window extends JFrame implements Runnable {
 
         // Detección de movimiento
         caminando = false;
+        atacando = false;
+        bloqueando = false;
 
-        if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) { //Comprueba si está caminando
+// Prioridad: Atacar > Bloquear > Caminar > Idle
+        if (Teclado.atacar) {
+            atacando = true;
+        } else if (Teclado.bloquear) {
+            bloqueando = true;
+        } else if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
             caminando = true;
         }
 
+// Actualizar orientación
         if (Teclado.derecha) {
-            horientacion = true;
-        }
-        if (Teclado.izquierda) {
-            horientacion = false;
+            orientacion = true;
+        } else if (Teclado.izquierda) {
+            orientacion = false;
         }
 
-        // Selección de sprite
-        if (caminando) {
-            g.drawImage(Assets.monaWalk[index], x, y, null);
+// Selección de sprite
+        if (isAttacking) {
+            if (orientacion) {
+                g.drawImage(Assets.monaAttack[attackIndex], x, y, null);
+            } else {
+                g.drawImage(Assets.monaAttackFlipped[attackIndex], x, y, null);
+            }
+
+        } else if (isBlocking) {
+            if (orientacion) {
+                g.drawImage(Assets.monaProtection[1], x, y, null);
+            } else {
+                g.drawImage(Assets.monaProtectionFlipped[1], x, y, null);
+            }
+
+        } else if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
+            if (orientacion) {
+                g.drawImage(Assets.monaWalk[walkIndex], x, y, null);
+            } else {
+                g.drawImage(Assets.monaWalkFlipped[walkIndex], x, y, null);
+            }
+
         } else {
-            g.drawImage(Assets.monaIdle[index], x, y, null);
+            if (orientacion) {
+                g.drawImage(Assets.monaIdle[idleIndex], x, y, null);
+            } else {
+                g.drawImage(Assets.monaIdleFlipped[idleIndex], x, y, null);
+            }
         }
+
 
         // Mostrar FPS
         g.setColor(Color.BLACK);
@@ -158,7 +231,6 @@ public class Window extends JFrame implements Runnable {
                 time = 0;
             }
         }
-
         stop();
     }
 
@@ -176,4 +248,5 @@ public class Window extends JFrame implements Runnable {
             e.printStackTrace();
         }
     }
+
 }

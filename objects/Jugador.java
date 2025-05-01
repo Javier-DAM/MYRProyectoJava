@@ -11,19 +11,31 @@ public class Jugador extends ObjetoJuego {
         super(posicion, sprites);
     }
 
+    boolean actualizar = true;
+
     @Override
     public void update() {
-        if (Teclado.arriba) {
-            posicion.setY(posicion.getY() - 2);
+        // Si está atacando o bloqueando, desactiva movimiento
+        if (Teclado.atacar || Teclado.bloquear) {
+            actualizar = false;
+        } else {
+            actualizar = true;
         }
-        if (Teclado.abajo) {
-            posicion.setY(posicion.getY() + 2);
-        }
-        if (Teclado.izquierda) {
-            posicion.setX(posicion.getX() - 2);
-        }
-        if (Teclado.derecha) {
-            posicion.setX(posicion.getX() + 2);
+
+        // Solo actualiza la posición si se permite
+        if (actualizar) {
+            if (Teclado.arriba) {
+                posicion.setY(posicion.getY() - 2);
+            }
+            if (Teclado.abajo) {
+                posicion.setY(posicion.getY() + 2);
+            }
+            if (Teclado.izquierda) {
+                posicion.setX(posicion.getX() - 2);
+            }
+            if (Teclado.derecha) {
+                posicion.setX(posicion.getX() + 2);
+            }
         }
     }
 
