@@ -1,14 +1,14 @@
 import Assets.Assets;
 import input.Teclado;
 import objects.GameState;
+import objects.Jugador;
+import objects.Vector2D;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
 import java.awt.image.BufferStrategy;
 
 public class Window extends JFrame implements Runnable {
-    JFrame frame = new JFrame();
 
     public static final int W = 1920, H = 1080;
     private Canvas canvas;
@@ -19,103 +19,120 @@ public class Window extends JFrame implements Runnable {
     private Graphics g;
 
     private final int fps = 60;
-    private double targetTime = 1000000000/fps;
+    private double targetTime = 1000000000 / fps;
     private double delta = 0;
     private int averagefps = fps;
 
-    //Cargar Sprites
     private int index = 0;
     private long lastTime = System.currentTimeMillis();
-    private long delay = 100; // Cambiar frame cada 100ms
+    private long delay = 100;
 
     private GameState gameState;
+    private Jugador jugador;
 
+    private boolean caminando = true, horientacion = true;
 
     public Window() {
-        frame.setExtendedState(JFrame.MAXIMIZED_BOTH);// Para ampliar la pantalla
-        setTitle("RSG");//titulo
-        setSize(W, H);//Pongo el tamaño de la ventana
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);//Para que al cerrar la ventana se termine la ejecución del progrma
+        setTitle("RSG");
+        setSize(W, H);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(true);
         setLocationRelativeTo(null);
         setVisible(true);
 
         canvas = new Canvas();
-
         canvas.setPreferredSize(new Dimension(W, H));
         canvas.setMaximumSize(new Dimension(W, H));
         canvas.setMinimumSize(new Dimension(W, H));
         canvas.setFocusable(true);
-        teclado  = new Teclado();
 
+        teclado = new Teclado();
         add(canvas);
         canvas.addKeyListener(teclado);
-
     }
 
     public static void main(String[] args) {
-
         new Window().start();
-
     }
 
     private void update() {
-
         teclado.update();
+        jugador.update();
         gameState.update();
 
-
-
-
-        if(System.currentTimeMillis() - lastTime > delay) {
+        if (System.currentTimeMillis() - lastTime > delay) {
             index++;
-            if(index >= Assets.monaIdle.length) { //Carga de 0 el Sprite de monaIdle
+
+            if (index >= Assets.monaIdle.length) {
                 index = 0;
             }
 
-            if(index >= Assets.monaWalk.length) { //Carga de 0 el Sprite de monaWalk
+            if (index >= Assets.monaWalk.length) {
                 index = 0;
             }
+
             lastTime = System.currentTimeMillis();
         }
     }
 
-
     private void draw() {
-
         bs = canvas.getBufferStrategy();
 
         if (bs == null) {
             canvas.createBufferStrategy(3);
             return;
         }
-        g = bs.getDrawGraphics();
-        //--------------------Dibujo-----------------------
 
+        g = bs.getDrawGraphics();
+
+        // Fondo
         g.setColor(Color.WHITE);
         g.fillRect(0, 0, W, H);
-      //  g.drawImage(Assets.monaIdle[index], 100, 100, null); // Dibuja frame actual del Sprite
-       // g.drawImage(Assets.monaWalk[index], 200, 200, null);
-        g.drawString("FPS: " + averagefps, 10, 10);
-        gameState.draw(g);
 
-        //-------------------------------------------------
+        // Posición actual del jugador
+        int x = (int) jugador.getPosicion().getX(); //Se transforma un double a int
+        int y = (int) jugador.getPosicion().getY();
+
+        // Detección de movimiento
+        caminando = false;
+
+        if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) { //Comprueba si está caminando
+            caminando = true;
+        }
+
+        if (Teclado.derecha) {
+            horientacion = true;
+        }
+        if (Teclado.izquierda) {
+            horientacion = false;
+        }
+
+        // Selección de sprite
+        if (caminando) {
+            g.drawImage(Assets.monaWalk[index], x, y, null);
+        } else {
+            g.drawImage(Assets.monaIdle[index], x, y, null);
+        }
+
+        // Mostrar FPS
+        g.setColor(Color.BLACK);
+        g.drawString("FPS: " + averagefps, 10, 10);
+
+        gameState.draw(g);
 
         g.dispose();
         bs.show();
-
     }
 
-
-    private void init(){
+    private void init() {
         Assets.init();
         gameState = new GameState();
+        jugador = new Jugador(new Vector2D(100, 100), Assets.monaIdle);
     }
 
     @Override
     public void run() {
-
-        long now = 0;
+        long now;
         long lastTime = System.nanoTime();
         int frames = 0;
         int time = 0;
@@ -133,34 +150,30 @@ public class Window extends JFrame implements Runnable {
                 draw();
                 delta--;
                 frames++;
-//                System.out.println("FPS: " + frames);
             }
+
             if (time >= 1000000000) {
                 averagefps = frames;
                 frames = 0;
                 time = 0;
             }
         }
-        stop();
 
+        stop();
     }
 
     private void start() {
-
         thread = new Thread(this);
         thread.start();
         running = true;
-
     }
 
     private void stop() {
-
         try {
             thread.join();
             running = false;
-        }catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
 }
