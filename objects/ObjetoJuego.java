@@ -30,4 +30,5 @@ public abstract class ObjetoJuego {
     public void setPosicion(Vector2D posicion) {
         this.posicion = posicion;
     }
+    
 }

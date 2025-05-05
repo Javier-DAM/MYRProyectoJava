@@ -23,24 +23,19 @@ public class Window extends JFrame implements Runnable {
     private double delta = 0;
     private int averagefps = fps;
 
-    private int index = 0;
+    private GameState gameState;
+    private Jugador jugador, jugador2;
+
+    private boolean j1orientacion = true, j2orientacion = false;
+    private boolean isAttacking1 = false, isBlocking1 = false;
+    private boolean isAttacking2 = false, isBlocking2 = false;
+    private int attackIndex1 = 0, attackIndex2 = 0;
+    private long attackLastTime1 = 0, attackLastTime2 = 0;
+    private int walkIndex1 = 0, idleIndex1 = 0;
+    private int walkIndex2 = 0, idleIndex2 = 0;
     private long lastTime = System.currentTimeMillis();
     private long delay = 100;
-
-    private GameState gameState;
-    private Jugador jugador;
-
-    private boolean caminando, orientacion, atacando, bloqueando;
-
-    //Delay tras pulsar hacer el ataque (J)
-    private int attackIndex = 0;
-    private long attackLastTime = 0;
-    private boolean isAttacking = false;
-    private int attackDelay = 100; // milisegundos por frame
-
-    //Al pusar Bloqueo (K)
-    private boolean isBlocking = false;
-
+    private int attackDelay = 100;
 
     public Window() {
         setTitle("RSG");
@@ -65,142 +60,149 @@ public class Window extends JFrame implements Runnable {
         new Window().start();
     }
 
-    private int walkIndex = 0;
-    private int idleIndex = 0;
-
     private void update() {
         teclado.update();
-        jugador.update();
+        jugador.updateJugador1();
+        jugador2.updateJugador2();
         gameState.update();
 
         long currentTime = System.currentTimeMillis();
 
-        // Prioridad: Atacar > Bloquear > Caminar > Idle
+        // MONA (Jugador 1)
         if (Teclado.atacar) {
-            if (!isAttacking) {
-                isAttacking = true;
-                attackIndex = 0;
-                attackLastTime = currentTime;
+            if (!isAttacking1) {
+                isAttacking1 = true;
+                attackIndex1 = 0;
+                attackLastTime1 = currentTime;
             }
         } else if (Teclado.bloquear) {
-            isBlocking = true;
-            isAttacking = false;
+            isBlocking1 = true;
+            isAttacking1 = false;
         } else {
-            isBlocking = false;
+            isBlocking1 = false;
             if (!Teclado.atacar) {
-                isAttacking = false;
-                attackIndex = 0;
+                isAttacking1 = false;
+                attackIndex1 = 0;
             }
         }
 
-        if (isAttacking && currentTime - attackLastTime > attackDelay) {
-            attackIndex++;
-            if (attackIndex >= Assets.monaAttack.length) {
-                isAttacking = false;
-                attackIndex = 0;
+        if (isAttacking1 && currentTime - attackLastTime1 > attackDelay) {
+            attackIndex1++;
+            if (attackIndex1 >= Assets.monaAttack.length) {
+                isAttacking1 = false;
+                attackIndex1 = 0;
             }
-            attackLastTime = currentTime;
+            attackLastTime1 = currentTime;
         }
 
+        if (Teclado.derecha) j1orientacion = true;
+        else if (Teclado.izquierda) j1orientacion = false;
+
+        // RONA (Jugador 2)
+        if (Teclado.atacar2) {
+            if (!isAttacking2) {
+                isAttacking2 = true;
+                attackIndex2 = 0;
+                attackLastTime2 = currentTime;
+            }
+        } else if (Teclado.bloquear2) {
+            isBlocking2 = true;
+            isAttacking2 = false;
+        } else {
+            isBlocking2 = false;
+            if (!Teclado.atacar2) {
+                isAttacking2 = false;
+                attackIndex2 = 0;
+            }
+        }
+
+        if (isAttacking2 && currentTime - attackLastTime2 > attackDelay) {
+            attackIndex2++;
+            if (attackIndex2 >= Assets.ronaAttack.length) {
+                isAttacking2 = false;
+                attackIndex2 = 0;
+            }
+            attackLastTime2 = currentTime;
+        }
+
+        if (Teclado.derecha2) j2orientacion = true;
+        else if (Teclado.izquierda2) j2orientacion = false;
+
+        // ACTUALIZACIÓN DE ANIMACIONES
         if (currentTime - lastTime > delay) {
-            if (!isAttacking && !isBlocking) {
-                if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
-                    walkIndex++;
-                    if (walkIndex >= Assets.monaWalk.length) walkIndex = 0;
-                } else {
-                    idleIndex++;
-                    if (idleIndex >= Assets.monaIdle.length) idleIndex = 0;
-                }
+            if (!isAttacking1 && !isBlocking1 && (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha)) {
+                walkIndex1 = (walkIndex1 + 1) % Assets.monaWalk.length;
+            } else {
+                idleIndex1 = (idleIndex1 + 1) % Assets.monaIdle.length;
             }
+
+            if (!isAttacking2 && !isBlocking2 && (Teclado.arriba2 || Teclado.abajo2 || Teclado.izquierda2 || Teclado.derecha2)) {
+                walkIndex2 = (walkIndex2 + 1) % Assets.ronaWalk.length;
+            } else {
+                idleIndex2 = (idleIndex2 + 1) % Assets.ronaIdle.length;
+            }
+
             lastTime = currentTime;
         }
     }
 
-
     private void draw() {
         bs = canvas.getBufferStrategy();
-
         if (bs == null) {
             canvas.createBufferStrategy(3);
             return;
         }
 
         g = bs.getDrawGraphics();
-
-        // Fondo
-        g.setColor(Color.WHITE);
+        g.setColor(new Color(60, 80, 40));
         g.fillRect(0, 0, W, H);
 
-        // Posición actual del jugador
-        int x = (int) jugador.getPosicion().getX(); //Se transforma un double a int
-        int y = (int) jugador.getPosicion().getY();
+        int x1 = (int) jugador.getPosicion().getPlayer1X();
+        int y1 = (int) jugador.getPosicion().getPlayer1Y();
+        int x2 = (int) jugador2.getPosicion().getPlayer2X();
+        int y2 = (int) jugador2.getPosicion().getPlayer2Y();
 
-        // Detección de movimiento
-        caminando = false;
-        atacando = false;
-        bloqueando = false;
+        // MONA
+        if (isAttacking1)
+            g.drawImage(j1orientacion ? Assets.monaAttack[attackIndex1] : Assets.monaAttackFlipped[attackIndex1], x1, y1, null);
+        else if (isBlocking1)
+            g.drawImage(j1orientacion ? Assets.monaProtection[1] : Assets.monaProtectionFlipped[1], x1, y1, null);
+        else if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha)
+            g.drawImage(j1orientacion ? Assets.monaWalk[walkIndex1] : Assets.monaWalkFlipped[walkIndex1], x1, y1, null);
+        else
+            g.drawImage(j1orientacion ? Assets.monaIdle[idleIndex1] : Assets.monaIdleFlipped[idleIndex1], x1, y1, null);
 
-// Prioridad: Atacar > Bloquear > Caminar > Idle
-        if (Teclado.atacar) {
-            atacando = true;
-        } else if (Teclado.bloquear) {
-            bloqueando = true;
-        } else if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
-            caminando = true;
-        }
+        // RONA
+        if (isAttacking2)
+            g.drawImage(j2orientacion ? Assets.ronaAttack[attackIndex2] : Assets.ronaAttackFlipped[attackIndex2], x2, y2, null);
+        else if (isBlocking2)
+            g.drawImage(j2orientacion ? Assets.ronaProtection[1] : Assets.ronaProtectionFlipped[1], x2, y2, null);
+        else if (Teclado.arriba2 || Teclado.abajo2 || Teclado.izquierda2 || Teclado.derecha2)
+            g.drawImage(j2orientacion ? Assets.ronaWalk[walkIndex2] : Assets.ronaWalkFlipped[walkIndex2], x2, y2, null);
+        else
+            g.drawImage(j2orientacion ? Assets.ronaIdle[idleIndex2] : Assets.ronaIdleFlipped[idleIndex2], x2, y2, null);
 
-// Actualizar orientación
-        if (Teclado.derecha) {
-            orientacion = true;
-        } else if (Teclado.izquierda) {
-            orientacion = false;
-        }
-
-// Selección de sprite
-        if (isAttacking) {
-            if (orientacion) {
-                g.drawImage(Assets.monaAttack[attackIndex], x, y, null);
-            } else {
-                g.drawImage(Assets.monaAttackFlipped[attackIndex], x, y, null);
-            }
-
-        } else if (isBlocking) {
-            if (orientacion) {
-                g.drawImage(Assets.monaProtection[1], x, y, null);
-            } else {
-                g.drawImage(Assets.monaProtectionFlipped[1], x, y, null);
-            }
-
-        } else if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
-            if (orientacion) {
-                g.drawImage(Assets.monaWalk[walkIndex], x, y, null);
-            } else {
-                g.drawImage(Assets.monaWalkFlipped[walkIndex], x, y, null);
-            }
-
-        } else {
-            if (orientacion) {
-                g.drawImage(Assets.monaIdle[idleIndex], x, y, null);
-            } else {
-                g.drawImage(Assets.monaIdleFlipped[idleIndex], x, y, null);
-            }
-        }
-
-
-        // Mostrar FPS
-        g.setColor(Color.BLACK);
-        g.drawString("FPS: " + averagefps, 10, 10);
+        textos();
 
         gameState.draw(g);
-
         g.dispose();
         bs.show();
+    }
+
+    private void textos() {
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Tahoma", Font.BOLD, 10));
+        g.drawString("FPS: " + averagefps, 10, 10);
+        g.setFont(new Font("Tahoma", Font.BOLD, 15));
+        g.drawString("Jugador 1: Caminar: WASD Atacar: V Bloquear: B", 10, 30);
+        g.drawString("Jugador 2: Caminar: ↑↓→← Atacar: , Bloquear: .", 10, 50);
     }
 
     private void init() {
         Assets.init();
         gameState = new GameState();
-        jugador = new Jugador(new Vector2D(100, 100), Assets.monaIdle);
+        jugador = new Jugador(1, new Vector2D(100, 100), Assets.monaIdle);
+        jugador2 = new Jugador(2, new Vector2D(500, 500), Assets.ronaIdle);
     }
 
     @Override
@@ -248,5 +250,4 @@ public class Window extends JFrame implements Runnable {
             e.printStackTrace();
         }
     }
-
 }

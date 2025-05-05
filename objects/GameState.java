@@ -1,22 +1,39 @@
 package objects;
 
-import Assets.Assets;
-import input.Teclado;
+import java.awt.Graphics;
 
-import javax.swing.*;
-import java.awt.*;
-
+/**
+ * Clase base para representar el estado general del juego.
+ * Aquí se podrían manejar cosas como lógica de colisiones,
+ * detección de victoria, UI, pausa, etc.
+ */
 public class GameState {
-    private Jugador jugador;
+
+    private boolean pausado;
+
     public GameState() {
-        jugador = new Jugador(new Vector2D(100,500),Assets.monaWalk);
-
-
+        this.pausado = false;
     }
-    public void update(){
-        jugador.update();
+
+    public void update() {
+        if (pausado) return;
+
+        // Aquí iría lógica global del juego, como detectar colisiones,
+        // actualizar temporizadores, etc.
     }
-    public void draw(Graphics g){
-        jugador.draw(g);
+
+    public void draw(Graphics g) {
+        if (pausado) {
+            g.drawString("Juego en Pausa", 800, 400);
+        }
+    }
+
+    public void pausar() {
+        pausado = !pausado;
+    }
+
+    public boolean isPausado() {
+        return pausado;
     }
 }
+
