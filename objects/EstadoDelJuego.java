@@ -1,25 +1,16 @@
 package objects;
 
 import java.awt.Graphics;
-
-/**
- * Clase base para representar el estado general del juego.
- * Aquí se podrían manejar cosas como lógica de colisiones,
- * detección de victoria, UI, pausa, etc.
- */
-public class GameState {
+public class EstadoDelJuego {
 
     private boolean pausado;
 
-    public GameState() {
+    public EstadoDelJuego() {
         this.pausado = false;
     }
 
     public void update() {
         if (pausado) return;
-
-        // Aquí iría lógica global del juego, como detectar colisiones,
-        // actualizar temporizadores, etc.
     }
 
     public void draw(Graphics g) {

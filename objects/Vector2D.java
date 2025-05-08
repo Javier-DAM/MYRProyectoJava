@@ -1,60 +1,51 @@
 package objects;
+
 public class Vector2D {
-
-    public double player1X, player1Y; //Jugador 1
-    public double player2X, player2Y; //Jugador 2
-
-    public double enemiesX, enemiesY; //Enemigos
-
+    private double x, y;
 
     public Vector2D(double x, double y) {
-        this.player1X = x;
-        this.player1Y = y;
-
-        this.player2X = x;
-        this.player2Y = y;
-
+        this.x = x;
+        this.y = y;
     }
+
     public Vector2D() {
-        player1X = 0;
-        player1Y = 0;
-        player2X = 0;
-        player2Y = 0;
+        this(0, 0);
     }
 
-    //Getters and Setter de PLayer 1
-    public double getPlayer1X() {
-        return player1X;
+    public double getX() {
+        return x;
     }
 
-    public void setPlayer1X(double player1X) {
-        this.player1X = player1X;
+    public void setX(double x) {
+        this.x = x;
     }
 
-    public double getPlayer1Y() {
-        return player1Y;
+    public double getY() {
+        return y;
     }
 
-    public void setPlayer1Y(double player1Y) {
-        this.player1Y = player1Y;
+    public void setY(double y) {
+        this.y = y;
     }
 
-    //Getters and Setters Player 2
-    public double getPlayer2X() {
-        return player2X;
+    public Vector2D add(Vector2D other) {
+        return new Vector2D(this.x + other.x, this.y + other.y);
     }
 
-    public void setPlayer2X(double player2X) {
-        this.player2X = player2X;
+    public Vector2D subtract(Vector2D other) {
+        return new Vector2D(this.x - other.x, this.y - other.y);
     }
 
-    public double getPlayer2Y() {
-        return player2Y;
+    public Vector2D scale(double factor) {
+        return new Vector2D(this.x * factor, this.y * factor);
     }
 
-    public void setPlayer2Y(double player2Y) {
-        this.player2Y = player2Y;
+    public double getMagnitude() {
+        return Math.sqrt(x * x + y * y);
     }
 
-    //Getters and Setter Enemies
+    public Vector2D normalize() {
+        double mag = getMagnitude();
+        return mag == 0 ? new Vector2D(0, 0) : new Vector2D(x / mag, y / mag);
+    }
 }

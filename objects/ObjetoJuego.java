@@ -4,24 +4,16 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 
 public abstract class ObjetoJuego {
-    protected BufferedImage texture;
     protected Vector2D posicion;
+    protected BufferedImage texture;
 
-    public ObjetoJuego(Vector2D posicion, BufferedImage[] texture) {
+    public ObjetoJuego(Vector2D posicion, BufferedImage[] textures) {
         this.posicion = posicion;
-        this.texture = texture[0]; // Usamos el primer sprite como textura inicial
+        this.texture = textures[0];
     }
 
     public abstract void update();
     public abstract void draw(Graphics g);
-
-    public BufferedImage getTexture() {
-        return texture;
-    }
-
-    public void setTexture(BufferedImage texture) {
-        this.texture = texture;
-    }
 
     public Vector2D getPosicion() {
         return posicion;
@@ -30,5 +22,12 @@ public abstract class ObjetoJuego {
     public void setPosicion(Vector2D posicion) {
         this.posicion = posicion;
     }
-    
+
+    public BufferedImage getTexture() {
+        return texture;
+    }
+
+    public void setTexture(BufferedImage texture) {
+        this.texture = texture;
+    }
 }

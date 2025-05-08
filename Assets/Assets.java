@@ -5,121 +5,143 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 public class Assets {
+    //Mona
+    public static BufferedImage[] monaIdle, monaIdleFlipped;
+    public static BufferedImage[] monaWalk, monaWalkFlipped;
+    public static BufferedImage[] monaAttack, monaAttackFlipped;
+    public static BufferedImage[] monaProtection, monaProtectionFlipped;
 
-//Assets de Mona
-    public static BufferedImage[] monaIdle;
-    public static BufferedImage[] monaIdleFlipped;
-    public static BufferedImage[] monaWalk;
-    public static BufferedImage[] monaWalkFlipped;
-    public static BufferedImage[] monaAttack;
-    public static BufferedImage[] monaAttackFlipped;
-    public static BufferedImage[] monaProtection;
-    public static BufferedImage[] monaProtectionFlipped;
+    //Rona
+    public static BufferedImage[] ronaIdle, ronaIdleFlipped;
+    public static BufferedImage[] ronaWalk, ronaWalkFlipped;
+    public static BufferedImage[] ronaAttack, ronaAttackFlipped;
+    public static BufferedImage[] ronaProtection, ronaProtectionFlipped;
 
-//Assets de Rona
-    public static BufferedImage[] ronaIdle;
-    public static BufferedImage[] ronaIdleFlipped;
-    public static BufferedImage[] ronaWalk;
-    public static BufferedImage[] ronaWalkFlipped;
-    public static BufferedImage[] ronaAttack;
-    public static BufferedImage[] ronaAttackFlipped;
-    public static BufferedImage[] ronaProtection;
-    public static BufferedImage[] ronaProtectionFlipped;
+    //Hombre lobo
+    public static BufferedImage[] foxyIdle, foxyIdleFlipped;
+    public static BufferedImage[] foxyWalk, foxyWalkFlipped;
+    public static BufferedImage[] foxyRun, foxyRunFlipped;
+    public static BufferedImage[] foxyAttack, foxyAttackFlipped;
+    public static BufferedImage[] foxyDead, foxyDeadFlipped;
+
+    //Medusa
+    public static BufferedImage[] jellyIdle1, jellyIdle1Flipped, jellyIdle2, jellyIdle2Flipped;
+    public static BufferedImage[] jellyWalk, jellyWalkFlipped;
+    public static BufferedImage[] jellyRun, jellyRunFlipped;
+    public static BufferedImage[] jellyAttack, jellyAttackFlipped;
+    public static BufferedImage[] jellyDead, jellyDeadFlipped;
 
     public static void init() {
-        //Mona
+        //Mona Assets
         BufferedImage idleSheetMona = Loader.loadImage("Assets/Sprites/Mona/Idle.png");
         BufferedImage walkSheetMona = Loader.loadImage("Assets/Sprites/Mona/Walk.png");
         BufferedImage attackSheetMona = Loader.loadImage("Assets/Sprites/Mona/Attack.png");
         BufferedImage protectionSheetMona = Loader.loadImage("Assets/Sprites/Mona/Protection.png");
 
-        monaIdle = new BufferedImage[7];
-        monaWalk = new BufferedImage[12];
-        monaAttack = new BufferedImage[9];
-        monaProtection = new BufferedImage[2];
+        monaIdle = sliceSheet(idleSheetMona, 7);
+        monaWalk = sliceSheet(walkSheetMona, 12);
+        monaAttack = sliceSheet(attackSheetMona, 9);
+        monaProtection = sliceSheet(protectionSheetMona, 2);
 
-        //Rona
+        monaIdleFlipped = flipSprites(monaIdle);
+        monaWalkFlipped = flipSprites(monaWalk);
+        monaAttackFlipped = flipSprites(monaAttack);
+        monaProtectionFlipped = flipSprites(monaProtection);
+
+        //Rona Assets
         BufferedImage idleSheetRona = Loader.loadImage("Assets/Sprites/Rona/Idle.png");
         BufferedImage walkSheetRona = Loader.loadImage("Assets/Sprites/Rona/Walk.png");
         BufferedImage attackSheetRona = Loader.loadImage("Assets/Sprites/Rona/Attack.png");
         BufferedImage protectionSheetRona = Loader.loadImage("Assets/Sprites/Rona/Protection.png");
 
-        ronaIdle = new BufferedImage[6];
-        ronaWalk = new BufferedImage[12];
-        ronaAttack = new BufferedImage[6];
-        ronaProtection = new BufferedImage[3];
+        ronaIdle = sliceSheet(idleSheetRona, 6);
+        ronaWalk = sliceSheet(walkSheetRona, 12);
+        ronaAttack = sliceSheet(attackSheetRona, 6);
+        ronaProtection = sliceSheet(protectionSheetRona, 3);
 
+        ronaIdleFlipped = flipSprites(ronaIdle);
+        ronaWalkFlipped = flipSprites(ronaWalk);
+        ronaAttackFlipped = flipSprites(ronaAttack);
+        ronaProtectionFlipped = flipSprites(ronaProtection);
 
+        //Foxy Assets
+        BufferedImage idleSheetFoxy = Loader.loadImage("Assets/Sprites/Foxy/Idle.png");
+        BufferedImage walkSheetFoxy = Loader.loadImage("Assets/Sprites/Foxy/Walk.png");
+        BufferedImage runSheetFoxy = Loader.loadImage("Assets/Sprites/Foxy/Run.png");
+        BufferedImage attackSheetFoxy = Loader.loadImage("Assets/Sprites/Foxy/Attack.png");
+        BufferedImage deadSheetFocy = Loader.loadImage("Assets/Sprites/Foxy/Dead.png");
 
-        //Dividirá cada Sprite en trozos específicos. Cambia según el Sprite
-            //Mona
-        for (int i = 0; i < 7; i++) {
-            monaIdle[i] = idleSheetMona.getSubimage(i * 128, 0, 128, 128);
-        }
+        foxyIdle = sliceSheet(idleSheetFoxy, 8);
+        foxyWalk = sliceSheet(walkSheetFoxy, 11);
+        foxyRun = sliceSheet(runSheetFoxy, 9);
+        foxyAttack = sliceSheet(attackSheetFoxy, 6);
+        foxyDead = sliceSheet(deadSheetFocy, 2);
 
-        for (int i = 0; i < 12; i++) {
-            monaWalk[i] = walkSheetMona.getSubimage(i * 128, 0, 128, 128);
-        }
+        foxyIdleFlipped = flipSprites(foxyIdle);
+        foxyWalkFlipped = flipSprites(foxyWalk);
+        foxyRunFlipped = flipSprites(foxyRun);
+        foxyAttackFlipped = flipSprites(foxyAttack);
+        foxyDeadFlipped = flipSprites(foxyDead);
 
-        for (int i = 0; i < 9; i++) {
-            monaAttack[i] = attackSheetMona.getSubimage(i * 128, 0, 128, 128);
-        }
+        //Jelly Assets
+        BufferedImage idle1SheetJelly = Loader.loadImage("Assets/Sprites/Jelly/Idle_1.png");
+        BufferedImage idle2SheetJelly = Loader.loadImage("Assets/Sprites/Jelly/Idle_2.png");
+        BufferedImage walkSheetJelly = Loader.loadImage("Assets/Sprites/Jelly/Walk.png");
+        BufferedImage runSheetJelly = Loader.loadImage("Assets/Sprites/Jelly/Run.png");
+        BufferedImage attackSheetJelly = Loader.loadImage("Assets/Sprites/Jelly/Attack.png");
+        BufferedImage deadSheetJelly = Loader.loadImage("Assets/Sprites/Jelly/Dead.png");
 
-        for (int i = 0; i < 2; i++) {
-            monaProtection[i] = protectionSheetMona.getSubimage(i * 128, 0, 128, 128);
-        }
+        jellyIdle1 = sliceSheet(idle1SheetJelly, 5);
+        jellyIdle2 = sliceSheet(idle2SheetJelly, 7);
+        jellyWalk = sliceSheet(walkSheetJelly, 13);
+        jellyRun = sliceSheet(runSheetJelly, 9);
+        jellyAttack = sliceSheet(attackSheetJelly, 6);
+        jellyDead = sliceSheet(deadSheetJelly, 2);
 
-        // Crear versiones volteadas o espejo
-        monaIdleFlipped = voltearSprites(monaIdle);
-        monaWalkFlipped = voltearSprites(monaWalk);
-        monaAttackFlipped = voltearSprites(monaAttack);
-        monaProtectionFlipped = voltearSprites(monaProtection);
-
-            //Rona
-        for (int i = 0; i < 6; i++) {
-            ronaIdle[i] = idleSheetRona.getSubimage(i * 128, 0, 128, 128);
-        }
-
-        for (int i = 0; i < 12; i++) {
-            ronaWalk[i] = walkSheetRona.getSubimage(i * 128, 0, 128, 128);
-        }
-
-        for (int i = 0; i < 6; i++) {
-            ronaAttack[i] = attackSheetRona.getSubimage(i * 128, 0, 128, 128);
-        }
-
-        for (int i = 0; i < 3; i++) {
-            ronaProtection[i] = protectionSheetRona.getSubimage(i * 128, 0, 128, 128);
-        }
-
-        // Crear versiones volteadas o espejo
-        ronaIdleFlipped = voltearSprites(ronaIdle);
-        ronaWalkFlipped = voltearSprites(ronaWalk);
-        ronaAttackFlipped = voltearSprites(ronaAttack);
-        ronaProtectionFlipped = voltearSprites(ronaProtection);
+        jellyIdle1Flipped = flipSprites(jellyIdle1);
+        jellyIdle2Flipped = flipSprites(jellyIdle2);
+        jellyWalkFlipped = flipSprites(jellyWalk);
+        jellyRunFlipped = flipSprites(jellyRun);
+        jellyAttackFlipped = flipSprites(jellyAttack);
+        jellyDeadFlipped = flipSprites(jellyDead);
     }
 
-    private static BufferedImage[] voltearSprites(BufferedImage[] original) { //Método que voltea los Sprites
-        BufferedImage[] flipped = new BufferedImage[original.length];
-        for (int i = 0; i < original.length; i++) {
-            flipped[i] = voltearImagen(original[i]);
+    private static BufferedImage[] sliceSheet(BufferedImage sheet, int frames) {
+        BufferedImage[] result = new BufferedImage[frames];
+        int frameWidth = sheet.getWidth() / frames;
+        int frameHeight = sheet.getHeight();
+
+        for (int i = 0; i < frames; i++) {
+            int x = i * frameWidth;
+
+            if (x + frameWidth <= sheet.getWidth()) {
+                result[i] = sheet.getSubimage(x, 0, frameWidth, frameHeight);
+            } else {
+                System.err.println("sliceSheet: fuera de rango en frame " + i + " -> x=" + x + " ancho=" + frameWidth);
+                result[i] = null;
+            }
+        }
+        return result;
+    }
+
+
+    private static BufferedImage[] flipSprites(BufferedImage[] originals) {
+        BufferedImage[] flipped = new BufferedImage[originals.length];
+        for (int i = 0; i < originals.length; i++) {
+            flipped[i] = flipImage(originals[i]);
         }
         return flipped;
     }
 
-    public static BufferedImage voltearImagen(BufferedImage imagenOriginal) {
-        int ancho = imagenOriginal.getWidth();
-        int alto = imagenOriginal.getHeight();
-
-        BufferedImage imagenVolteada = new BufferedImage(ancho, alto, imagenOriginal.getType());
-        Graphics2D g = imagenVolteada.createGraphics();
-
-        AffineTransform at = AffineTransform.getScaleInstance(-1, 1);
-        at.translate(-ancho, 0);
-
-        g.drawImage(imagenOriginal, at, null);
+    public static BufferedImage flipImage(BufferedImage img) {
+        int w = img.getWidth();
+        int h = img.getHeight();
+        BufferedImage flipped = new BufferedImage(w, h, img.getType());
+        Graphics2D g = flipped.createGraphics();
+        AffineTransform tx = AffineTransform.getScaleInstance(-1, 1);
+        tx.translate(-w, 0);
+        g.drawImage(img, tx, null);
         g.dispose();
-
-        return imagenVolteada;
+        return flipped;
     }
 }

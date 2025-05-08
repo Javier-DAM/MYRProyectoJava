@@ -1,30 +1,28 @@
 import Assets.Assets;
 import input.Teclado;
-import objects.GameState;
-import objects.Jugador;
-import objects.Vector2D;
-
-import javax.swing.*;
+import objects.*;
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.*;
 
 public class Window extends JFrame implements Runnable {
 
-    public static final int W = 1920, H = 1080;
+    private static final int W = 800, H = 600;
     private Canvas canvas;
     private Thread thread;
     private boolean running = false;
-    private Teclado teclado;
-    private BufferStrategy bs;
     private Graphics g;
-
-    private final int fps = 60;
-    private double targetTime = 1000000000 / fps;
+    private BufferStrategy bs;
+    private Teclado teclado;
+    private Jugador jugador1, jugador2;
+    private Enemigos enemigo1, enemigo2, enemigo3, enemigo4;
+    private List<Enemigos> enemigosList;
+    private EstadoDelJuego estadoDelJuego;
+    private int averagefps;
     private double delta = 0;
-    private int averagefps = fps;
-
-    private GameState gameState;
-    private Jugador jugador, jugador2;
+    private double targetTime = 1000000000.0 / 60.0; // 60 FPS
 
     private boolean j1orientacion = true, j2orientacion = false;
     private boolean isAttacking1 = false, isBlocking1 = false;
@@ -37,13 +35,13 @@ public class Window extends JFrame implements Runnable {
     private long delay = 100;
     private int attackDelay = 100;
 
+
     public Window() {
         setTitle("RSG");
         setSize(W, H);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(true);
+        setResizable(false);
         setLocationRelativeTo(null);
-        setVisible(true);
 
         canvas = new Canvas();
         canvas.setPreferredSize(new Dimension(W, H));
@@ -52,21 +50,32 @@ public class Window extends JFrame implements Runnable {
         canvas.setFocusable(true);
 
         teclado = new Teclado();
-        add(canvas);
         canvas.addKeyListener(teclado);
+        add(canvas);
+
+        setVisible(true);
     }
 
-    public static void main(String[] args) {
-        new Window().start();
+    public void iniciarJuego() {
+         this.start();
     }
 
     private void update() {
         teclado.update();
-        jugador.updateJugador1();
+        jugador1.updateJugador1();
         jugador2.updateJugador2();
-        gameState.update();
+        estadoDelJuego.update();
 
         long currentTime = System.currentTimeMillis();
+
+        //Actualizar enemigos
+        for (Enemigos enemigo : enemigosList) {
+            enemigo.update();
+        }
+
+        if (jugador1.getSalud() < 0 && jugador2.getSalud() < 0) {
+
+        }
 
         // MONA (Jugador 1)
         if (Teclado.atacar) {
@@ -141,7 +150,6 @@ public class Window extends JFrame implements Runnable {
             } else {
                 idleIndex2 = (idleIndex2 + 1) % Assets.ronaIdle.length;
             }
-
             lastTime = currentTime;
         }
     }
@@ -157,10 +165,11 @@ public class Window extends JFrame implements Runnable {
         g.setColor(new Color(60, 80, 40));
         g.fillRect(0, 0, W, H);
 
-        int x1 = (int) jugador.getPosicion().getPlayer1X();
-        int y1 = (int) jugador.getPosicion().getPlayer1Y();
-        int x2 = (int) jugador2.getPosicion().getPlayer2X();
-        int y2 = (int) jugador2.getPosicion().getPlayer2Y();
+        //Posicones en enteros
+        int x1 = (int) jugador1.getPosicion().getX();
+        int y1 = (int) jugador1.getPosicion().getY();
+        int x2 = (int) jugador2.getPosicion().getX();
+        int y2 = (int) jugador2.getPosicion().getY();
 
         // MONA
         if (isAttacking1)
@@ -182,28 +191,74 @@ public class Window extends JFrame implements Runnable {
         else
             g.drawImage(j2orientacion ? Assets.ronaIdle[idleIndex2] : Assets.ronaIdleFlipped[idleIndex2], x2, y2, null);
 
-        textos();
+        //Dibujar Enemigos
+        for (Enemigos enemigo: enemigosList){
+            enemigo.draw(g);
+        }
 
-        gameState.draw(g);
+        //Textos
+        textos();
+        estadoDelJuego.draw(g);
         g.dispose();
         bs.show();
     }
 
     private void textos() {
+        int vidaP1 = jugador1.getSalud();
+        int vidaP2 = jugador2.getSalud();
+
+        //Posicones en enteros
+        int x1 = (int) jugador1.getPosicion().getX();
+        int y1 = (int) jugador1.getPosicion().getY();
+        int x2 = (int) jugador2.getPosicion().getX();
+        int y2 = (int) jugador2.getPosicion().getY();
+
         g.setColor(Color.WHITE);
         g.setFont(new Font("Tahoma", Font.BOLD, 10));
         g.drawString("FPS: " + averagefps, 10, 10);
         g.setFont(new Font("Tahoma", Font.BOLD, 15));
         g.drawString("Jugador 1: Caminar: WASD Atacar: V Bloquear: B", 10, 30);
         g.drawString("Jugador 2: Caminar: ↑↓→← Atacar: , Bloquear: .", 10, 50);
+        g.setFont(new Font("Arial", Font.BOLD, 15));
+        g.drawString("Vida jugador 1: "+ vidaP1+ " - Jugador 2: " + vidaP2, 50, 70);
+
+        if (vidaP1 > 0){
+            g.drawString( "Vida"+vidaP1, x1, y1);
+        }else {
+            g.drawString( "Vida"+0, x1, y1);
+        }
+        if (vidaP2 > 0){
+            g.drawString( "Vida"+vidaP2, x2, y2);
+        }else {
+            g.drawString( "Vida"+0, x2, y2);
+        }
     }
 
+    // Dentro del método init()
     private void init() {
         Assets.init();
-        gameState = new GameState();
-        jugador = new Jugador(1, new Vector2D(100, 100), Assets.monaIdle);
-        jugador2 = new Jugador(2, new Vector2D(500, 500), Assets.ronaIdle);
+        estadoDelJuego = new EstadoDelJuego();
+        jugador1 = new Jugador(1, new Vector2D(100, 100), Assets.monaIdle);
+        jugador2 = new Jugador(2, new Vector2D(200, 200), Assets.ronaIdle);
+
+        enemigosList = new ArrayList<>();
+
+        enemigo1 = new Enemigos(new Vector2D(300, 200), Assets.foxyIdle);
+        enemigo1.setWalkSprites(Assets.foxyWalk, Assets.foxyWalkFlipped);
+
+        enemigo2 = new Enemigos(new Vector2D(600, 300), Assets.jellyIdle1);
+        enemigo2.setWalkSprites(Assets.jellyWalk, Assets.jellyWalkFlipped);
+
+        enemigosList.add(enemigo1);
+        enemigosList.add(enemigo2);
+
+        enemigo1.setJugador1(jugador1);
+        enemigo1.setJugador2(jugador2);
+        enemigo2.setJugador1(jugador1);
+        enemigo2.setJugador2(jugador2);
     }
+
+
 
     @Override
     public void run() {
