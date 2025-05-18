@@ -23,7 +23,8 @@ public class Teclado implements KeyListener {
     public static boolean bloquear2 = false;
 
     //Menus
-    public static boolean menuESC = false;
+    public static boolean enter = false;
+    public static boolean r = false;
 
 
     public Teclado() {
@@ -44,7 +45,8 @@ public class Teclado implements KeyListener {
         this.bloquear2 = bloquear2;
 
         //Menus
-        this.menuESC = menuESC;
+        this.enter = enter;
+        this.r = r;
     }
 
     public void update(){
@@ -66,12 +68,13 @@ public class Teclado implements KeyListener {
         bloquear2  = keys[KeyEvent.VK_PERIOD];  // tecla .
 
         //Menus
-        menuESC = keys[KeyEvent.VK_ESCAPE];
+        enter = keys[KeyEvent.VK_ENTER]; // Enter
+        r = keys[KeyEvent.VK_R];         // R
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-    keys[e.getKeyCode()] = true;
+        keys[e.getKeyCode()] = true;
     }
 
     @Override
@@ -82,5 +85,4 @@ public class Teclado implements KeyListener {
     @Override
     public void keyTyped(KeyEvent e) {
     }
-    
 }

@@ -6,23 +6,6 @@ public class Main {
         Window ventana = new Window();
         Scanner sc = new Scanner(System.in);
         ventana.iniciarJuego();
-        System.out.println("¿Qué quieres hacer?");
-        System.out.println("Iniciar juego modo 1 jugador");
-        System.out.println("Iniciar juego modo 2 jugadores");
-        System.out.println("Salir");
-
-        do {
-            switch (sc.nextInt()){
-                case 1:
-
-                case 2:
-                    System.out.println("Coñoooo");
-                    break;
-                case 3:
-                    System.out.println("Chao, causa");
-                    break;
-            }
-        }while (sc.nextInt()!=3);
     }
 }
 

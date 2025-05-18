@@ -10,12 +10,14 @@ public class Assets {
     public static BufferedImage[] monaWalk, monaWalkFlipped;
     public static BufferedImage[] monaAttack, monaAttackFlipped;
     public static BufferedImage[] monaProtection, monaProtectionFlipped;
+    public static BufferedImage[] monaDialogue, monaDialogueFlipped;
 
     //Rona
     public static BufferedImage[] ronaIdle, ronaIdleFlipped;
     public static BufferedImage[] ronaWalk, ronaWalkFlipped;
     public static BufferedImage[] ronaAttack, ronaAttackFlipped;
     public static BufferedImage[] ronaProtection, ronaProtectionFlipped;
+    public static BufferedImage[] ronaDialogue, ronaDialogueFlipped;
 
     //Hombre lobo
     public static BufferedImage[] foxyIdle, foxyIdleFlipped;
@@ -37,32 +39,38 @@ public class Assets {
         BufferedImage walkSheetMona = Loader.loadImage("Assets/Sprites/Mona/Walk.png");
         BufferedImage attackSheetMona = Loader.loadImage("Assets/Sprites/Mona/Attack.png");
         BufferedImage protectionSheetMona = Loader.loadImage("Assets/Sprites/Mona/Protection.png");
+        BufferedImage dialogueSheetMona = Loader.loadImage("Assets/Sprites/Mona/Dialogue.png");
 
         monaIdle = sliceSheet(idleSheetMona, 7);
         monaWalk = sliceSheet(walkSheetMona, 12);
         monaAttack = sliceSheet(attackSheetMona, 9);
         monaProtection = sliceSheet(protectionSheetMona, 2);
+        monaDialogue = sliceSheet(dialogueSheetMona, 6);
 
         monaIdleFlipped = flipSprites(monaIdle);
         monaWalkFlipped = flipSprites(monaWalk);
         monaAttackFlipped = flipSprites(monaAttack);
         monaProtectionFlipped = flipSprites(monaProtection);
+        monaDialogueFlipped = flipSprites(monaDialogue);
 
         //Rona Assets
         BufferedImage idleSheetRona = Loader.loadImage("Assets/Sprites/Rona/Idle.png");
         BufferedImage walkSheetRona = Loader.loadImage("Assets/Sprites/Rona/Walk.png");
         BufferedImage attackSheetRona = Loader.loadImage("Assets/Sprites/Rona/Attack.png");
         BufferedImage protectionSheetRona = Loader.loadImage("Assets/Sprites/Rona/Protection.png");
+        BufferedImage dialogueSheetRona = Loader.loadImage("Assets/Sprites/Rona/Dialogue.png");
 
         ronaIdle = sliceSheet(idleSheetRona, 6);
         ronaWalk = sliceSheet(walkSheetRona, 12);
         ronaAttack = sliceSheet(attackSheetRona, 6);
         ronaProtection = sliceSheet(protectionSheetRona, 3);
+        ronaDialogue = sliceSheet(dialogueSheetRona, 5);
 
         ronaIdleFlipped = flipSprites(ronaIdle);
         ronaWalkFlipped = flipSprites(ronaWalk);
         ronaAttackFlipped = flipSprites(ronaAttack);
         ronaProtectionFlipped = flipSprites(ronaProtection);
+        ronaDialogueFlipped = flipSprites(ronaDialogue);
 
         //Foxy Assets
         BufferedImage idleSheetFoxy = Loader.loadImage("Assets/Sprites/Foxy/Idle.png");
@@ -144,4 +152,5 @@ public class Assets {
         g.dispose();
         return flipped;
     }
+
 }

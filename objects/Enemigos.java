@@ -18,6 +18,33 @@ public class Enemigos extends ObjetoJuego {
     private long lastTime = System.currentTimeMillis();
     private long delay = 100;
 
+    private int vidaEnemigo = 10;
+
+    private boolean isAttacking1 = false, isAttacking2 = false, isBlocking1 = false, isBlocking2 = false, recibiendoDaño = false;
+    private int temporizadorDeDaño = 0;
+    private int cooldownDeDaño = 20; // duración durante la cual el enemigo no puede atacar
+
+
+    public void setIsAttacking1(boolean attacking) {
+        this.isAttacking1 = attacking;
+    }
+
+    public void setIsAttacking2(boolean attacking) {
+        this.isAttacking2 = attacking;
+    }
+
+    public void setIsBlocking1(boolean blocking) {
+        this.isBlocking1 = blocking;
+    }
+
+    public void setIsBlocking2(boolean blocking) {
+        this.isBlocking2 = blocking;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
     public Enemigos(Vector2D posicion, BufferedImage[] texture) {
         super(posicion, texture);
     }
@@ -38,6 +65,10 @@ public class Enemigos extends ObjetoJuego {
     @Override
     public void update() {
         if (jugador1 == null && jugador2 == null) return;
+
+        if (vidaEnemigo <= 0) {
+            return;
+        }
 
         Random r = new Random();
 
@@ -83,12 +114,42 @@ public class Enemigos extends ObjetoJuego {
         posicion.setY(y + ny * speed);
 
         int daño = r.nextInt(3) + 1;
-        if (dist1 < 30 && temporizadorDeAtaque <= 0 && jugador1.getSalud() > 0) {
-            jugador1.recibirDaño(daño);
-            temporizadorDeAtaque = cooldownDelAtaque;
-        } else if (dist2 < 30 && temporizadorDeAtaque <= 0 && jugador2.getSalud() > 0) {
-            jugador2.recibirDaño(daño);
-            temporizadorDeAtaque = cooldownDelAtaque;
+
+        // Control del estado de daño
+        if (temporizadorDeDaño > 0) {
+            temporizadorDeDaño--;
+            recibiendoDaño = true;
+        } else {
+            recibiendoDaño = false;
+        }
+
+        // Solo atacar si los jugadores NO están atacando
+        if (!isAttacking1 && !isAttacking2 && !recibiendoDaño && temporizadorDeAtaque <= 0) {
+            if (dist1 < 30 && jugador1.getSalud() > 0) {
+                if (isBlocking1) {
+                    // Retroceso enemigo - dirección opuesta a jugador 1
+                    double retroX = x - (dx1 / dist1) * 60;
+                    double retroY = y - (dy1 / dist1) * 60;
+                    posicion.setX(retroX);
+                    posicion.setY(retroY);
+                    System.out.println("Jugador 1 bloqueó el ataque. Enemigo retrocede.");
+                } else {
+                    jugador1.recibirDaño(daño);
+                    temporizadorDeAtaque = cooldownDelAtaque;
+                }
+            } else if (dist2 < 30 && jugador2.getSalud() > 0) {
+                if (isBlocking2) {
+                    // Retroceso enemigo - dirección opuesta a jugador 2
+                    double retroX = x - (dx2 / dist2) * 60;
+                    double retroY = y - (dy2 / dist2) * 60;
+                    posicion.setX(retroX);
+                    posicion.setY(retroY);
+                    System.out.println("Jugador 2 bloqueó el ataque. Enemigo retrocede.");
+                } else {
+                    jugador2.recibirDaño(daño);
+                    temporizadorDeAtaque = cooldownDelAtaque;
+                }
+            }
         }
 
         if (temporizadorDeAtaque > 0) {
@@ -99,6 +160,43 @@ public class Enemigos extends ObjetoJuego {
         if (currentTime - lastTime > delay) {
             walkIndex = (walkIndex + 1) % (walk != null ? walk.length : 1);
             lastTime = currentTime;
+        }
+
+        // Recibir daño de jugador 1
+        if (isAttacking1 && dist1 < 30 && jugador1.getSalud() > 0) {
+            vidaEnemigo -= 2;
+            temporizadorDeDaño = cooldownDeDaño;
+            System.out.println("Enemigo recibió daño de Jugador 1. Vida restante: " + vidaEnemigo);
+
+            if (vidaEnemigo <= 0) {
+                jugador1.incrementarEnemigosDerrotados();
+                System.out.println("Jugador 1 ha derrotado a un enemigo.");
+            }
+
+            // Retroceso enemigo
+            double retroX = x - (dx1 / dist1) * 60;
+            double retroY = y - (dy1 / dist1) * 60;
+            posicion.setX(retroX);
+            posicion.setY(retroY);
+        }
+
+
+        // Recibir daño de jugador 2
+        if (isAttacking2 && dist2 < 30 && jugador2.getSalud() > 0) {
+            vidaEnemigo -= 2;
+            temporizadorDeDaño = cooldownDeDaño;
+            System.out.println("Enemigo recibió daño de Jugador 2. Vida restante: " + vidaEnemigo);
+
+            if (vidaEnemigo <= 0) {
+                jugador2.incrementarEnemigosDerrotados();
+                System.out.println("Jugador 2 ha derrotado a un enemigo.");
+            }
+
+            // Retroceso enemigo
+            double retroX = x - (dx2 / dist2) * 60;
+            double retroY = y - (dy2 / dist2) * 60;
+            posicion.setX(retroX);
+            posicion.setY(retroY);
         }
     }
 
