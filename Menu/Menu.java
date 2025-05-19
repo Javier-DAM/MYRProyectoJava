@@ -2,8 +2,6 @@ package Menu;
 
 import input.Teclado;
 import objects.Jugador;
-
-import javax.swing.*;
 import java.awt.*;
 
 public class Menu {

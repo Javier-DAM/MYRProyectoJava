@@ -39,16 +39,16 @@ public class Window extends JFrame implements Runnable {
     private long delay = 100;
     private int attackDelay = 100;
     private long lastEnemySpawnTime = 0;
-    private long enemySpawnDelay = 500;
+    private long enemySpawnDelay = 3000;
 
     //Para pausar el juego
     private Menu menu;
 
     public Window() {
-        setTitle("RSG");
+        setTitle("Juego");
         setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(true);
+        setResizable(false);
         setLocationRelativeTo(null);
 
         canvas = new Canvas();
@@ -82,8 +82,6 @@ public class Window extends JFrame implements Runnable {
             lastEnemySpawnTime = System.currentTimeMillis();
         }
 
-
-
         jugador1.updateJugador1();
         jugador2.updateJugador2();
         estadoDelJuego.update();
@@ -100,7 +98,7 @@ public class Window extends JFrame implements Runnable {
         }
 
 
-
+    // =========== Ataque y bloqueo ===========
         // MONA (Jugador 1)
         if (jugador1.getSalud() > 0) {
             if (Teclado.atacar) {
@@ -209,7 +207,7 @@ public class Window extends JFrame implements Runnable {
         }
 
         g = bs.getDrawGraphics();
-        g.setColor(new Color(60, 80, 40));
+        g.setColor(new Color(75, 139, 59));
         g.fillRect(0, 0, width, height);
 
         if (menu.isPaused()) {
@@ -225,7 +223,6 @@ public class Window extends JFrame implements Runnable {
             bs.show();
             return;
         }
-
 
         // Crear una lista de objetos dibujables ordenables por Y
         List<ObjetoJuego> entidadesOrdenadas = new ArrayList<>();
@@ -249,8 +246,7 @@ public class Window extends JFrame implements Runnable {
                 int dialogueIndex = (jugador == jugador1) ? dialogueIndex1 : dialogueIndex2;
 
                 if (jugador.getSalud() < 0) {
-                    g.drawImage(orientacion
-                                    ? (jugador == jugador1 ? Assets.monaDialogue[dialogueIndex] : Assets.ronaDialogue[dialogueIndex])
+                    g.drawImage(orientacion ? (jugador == jugador1 ? Assets.monaDialogue[dialogueIndex] : Assets.ronaDialogue[dialogueIndex])
                                     : (jugador == jugador1 ? Assets.monaDialogueFlipped[dialogueIndex] : Assets.ronaDialogueFlipped[dialogueIndex]),
                             x, y, null);
                 } else {
@@ -277,18 +273,15 @@ public class Window extends JFrame implements Runnable {
                                 x, y, null);
                     }
                 }
-
             } else {
                 obj.draw(g); // Enemigo u otro objeto
             }
         }
-
         textos();
         estadoDelJuego.draw(g);
         g.dispose();
         bs.show();
     }
-
 
     private void textos() {
         int vidaP1 = jugador1.getSalud();
@@ -330,55 +323,6 @@ public class Window extends JFrame implements Runnable {
         jugador2 = new Jugador(2, new Vector2D(width / 2 + 32, height / 2 - 32), Assets.ronaIdle);
 
         enemigosList = new ArrayList<>();
-
-        Random rand = new Random();
-        int cantidadEnemigos = 10;
-        double distanciaMinima = 80.0;
-        int intentosMaximos = 100;
-
-        float maxVelocidadEnemigos = Math.min(jugador1.getVelocidad(), jugador2.getVelocidad()); // 5.0
-
-        for (int i = 0; i < cantidadEnemigos; ) {
-            boolean posicionValida = true;
-            Vector2D nuevaPos = new Vector2D(rand.nextInt(750), rand.nextInt(550));
-
-            for (Enemigos otro : enemigosList) {
-                double dx = nuevaPos.getX() - otro.getPosicion().getX();
-                double dy = nuevaPos.getY() - otro.getPosicion().getY();
-                if (Math.hypot(dx, dy) < distanciaMinima) {
-                    posicionValida = false;
-                    break;
-                }
-            }
-
-            if (posicionValida) {
-                Enemigos enemigo;
-
-                if (i % 2 == 0) {
-                    enemigo = new Enemigos(nuevaPos, Assets.foxyIdle);
-                    enemigo.setWalkSprites(Assets.foxyWalk, Assets.foxyWalkFlipped);
-                } else {
-                    enemigo = new Enemigos(nuevaPos, Assets.jellyIdle1);
-                    enemigo.setWalkSprites(Assets.jellyWalk, Assets.jellyWalkFlipped);
-                }
-
-                // Velocidad aleatoria entre 1.0 y menos que la velocidad del jugador
-                float velocidadAleatoria = 1.0f + rand.nextFloat() * (maxVelocidadEnemigos - 1.0f);
-                enemigo.setSpeed(velocidadAleatoria);
-
-                enemigo.setJugador1(jugador1);
-                enemigo.setJugador2(jugador2);
-
-                enemigosList.add(enemigo);
-                i++;
-            } else {
-                intentosMaximos = intentosMaximos;
-                if (intentosMaximos <= 0) {
-                    System.out.println("No se pudieron colocar todos los enemigos sin superposición.");
-                    break;
-                }
-            }
-        }
     }
 
     private void reiniciarJuego() {
@@ -444,24 +388,27 @@ public class Window extends JFrame implements Runnable {
 
     private void spawnEnemigo() {
         Random rand = new Random();
-        Vector2D nuevaPos = new Vector2D(rand.nextInt(750), rand.nextInt(550));
+        Vector2D nuevaPos = new Vector2D(rand.nextInt(width-10), rand.nextInt(height-10));
 
         Enemigos enemigo;
         if (rand.nextBoolean()) {
             enemigo = new Enemigos(nuevaPos, Assets.foxyIdle);
             enemigo.setWalkSprites(Assets.foxyWalk, Assets.foxyWalkFlipped);
+            enemigo.setAttackSprites(Assets.foxyAttack, Assets.foxyAttackFlipped);
+            enemigo.setDeadSprites(Assets.foxyDead, Assets.foxyDeadFlipped);
         } else {
             enemigo = new Enemigos(nuevaPos, Assets.jellyIdle1);
             enemigo.setWalkSprites(Assets.jellyWalk, Assets.jellyWalkFlipped);
+            enemigo.setAttackSprites(Assets.jellyAttack, Assets.jellyAttackFlipped);
+            enemigo.setDeadSprites(Assets.jellyDead, Assets.jellyDeadFlipped);
         }
 
         enemigo.setJugador1(jugador1);
         enemigo.setJugador2(jugador2);
 
-        float velocidadAleatoria = 1.0f + rand.nextFloat() * 2.0f; // velocidad aleatoria
+        float velocidadAleatoria = 1.0f + rand.nextFloat() * 2.0f;
         enemigo.setSpeed(velocidadAleatoria);
 
         enemigosList.add(enemigo);
     }
-
 }

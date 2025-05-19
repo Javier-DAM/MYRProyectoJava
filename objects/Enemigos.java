@@ -13,8 +13,13 @@ public class Enemigos extends ObjetoJuego {
 
     private BufferedImage[] walk;
     private BufferedImage[] walkFlipped;
+    private BufferedImage[] attack;
+    private BufferedImage[] attackFlipped;
+    private BufferedImage[] dead;
+    private BufferedImage[] deadFlipped;
     private boolean orientacionDerecha = true;
     private int walkIndex = 0;
+    private int attackIndex = 0;
     private long lastTime = System.currentTimeMillis();
     private long delay = 100;
 
@@ -22,8 +27,13 @@ public class Enemigos extends ObjetoJuego {
 
     private boolean isAttacking1 = false, isAttacking2 = false, isBlocking1 = false, isBlocking2 = false, recibiendoDaño = false;
     private int temporizadorDeDaño = 0;
-    private int cooldownDeDaño = 20; // duración durante la cual el enemigo no puede atacar
+    private int cooldownDeDaño = 20;
 
+    // Estados del enemigo
+    private enum Estado {
+        CAMINANDO, ATACANDO, MUERTO
+    }
+    private Estado estadoActual = Estado.CAMINANDO;
 
     public void setIsAttacking1(boolean attacking) {
         this.isAttacking1 = attacking;
@@ -54,6 +64,16 @@ public class Enemigos extends ObjetoJuego {
         this.walkFlipped = walkFlipped;
     }
 
+    public void setAttackSprites(BufferedImage[] attack, BufferedImage[] attackFlipped) {
+        this.attack = attack;
+        this.attackFlipped = attackFlipped;
+    }
+
+    public void setDeadSprites(BufferedImage[] dead, BufferedImage[] deadFlipped) {
+        this.dead = dead;
+        this.deadFlipped = deadFlipped;
+    }
+
     public void setJugador1(Jugador jugador1) {
         this.jugador1 = jugador1;
     }
@@ -67,6 +87,7 @@ public class Enemigos extends ObjetoJuego {
         if (jugador1 == null && jugador2 == null) return;
 
         if (vidaEnemigo <= 0) {
+            estadoActual = Estado.MUERTO;
             return;
         }
 
@@ -110,11 +131,6 @@ public class Enemigos extends ObjetoJuego {
             orientacionDerecha = dx2 > 0;
         }
 
-        posicion.setX(x + nx * speed);
-        posicion.setY(y + ny * speed);
-
-        int daño = r.nextInt(3) + 1;
-
         // Control del estado de daño
         if (temporizadorDeDaño > 0) {
             temporizadorDeDaño--;
@@ -126,6 +142,7 @@ public class Enemigos extends ObjetoJuego {
         // Solo atacar si los jugadores NO están atacando
         if (!isAttacking1 && !isAttacking2 && !recibiendoDaño && temporizadorDeAtaque <= 0) {
             if (dist1 < 30 && jugador1.getSalud() > 0) {
+                estadoActual = Estado.ATACANDO;
                 if (isBlocking1) {
                     // Retroceso enemigo - dirección opuesta a jugador 1
                     double retroX = x - (dx1 / dist1) * 60;
@@ -134,10 +151,11 @@ public class Enemigos extends ObjetoJuego {
                     posicion.setY(retroY);
                     System.out.println("Jugador 1 bloqueó el ataque. Enemigo retrocede.");
                 } else {
-                    jugador1.recibirDaño(daño);
+                    jugador1.recibirDaño(r.nextInt(3) + 1);
                     temporizadorDeAtaque = cooldownDelAtaque;
                 }
             } else if (dist2 < 30 && jugador2.getSalud() > 0) {
+                estadoActual = Estado.ATACANDO;
                 if (isBlocking2) {
                     // Retroceso enemigo - dirección opuesta a jugador 2
                     double retroX = x - (dx2 / dist2) * 60;
@@ -146,19 +164,31 @@ public class Enemigos extends ObjetoJuego {
                     posicion.setY(retroY);
                     System.out.println("Jugador 2 bloqueó el ataque. Enemigo retrocede.");
                 } else {
-                    jugador2.recibirDaño(daño);
+                    jugador2.recibirDaño(r.nextInt(3) + 1);
                     temporizadorDeAtaque = cooldownDelAtaque;
                 }
+            } else {
+                estadoActual = Estado.CAMINANDO;
+                posicion.setX(x + nx * speed);
+                posicion.setY(y + ny * speed);
             }
-        }
-
-        if (temporizadorDeAtaque > 0) {
+        } else if (temporizadorDeAtaque > 0) {
             temporizadorDeAtaque--;
+            estadoActual = Estado.ATACANDO;
+        } else {
+            estadoActual = Estado.CAMINANDO;
+            posicion.setX(x + nx * speed);
+            posicion.setY(y + ny * speed);
         }
 
+        // Actualizar animaciones
         long currentTime = System.currentTimeMillis();
         if (currentTime - lastTime > delay) {
-            walkIndex = (walkIndex + 1) % (walk != null ? walk.length : 1);
+            if (estadoActual == Estado.CAMINANDO) {
+                walkIndex = (walkIndex + 1) % (walk != null ? walk.length : 1);
+            } else if (estadoActual == Estado.ATACANDO && attack != null) {
+                attackIndex = (attackIndex + 1) % attack.length;
+            }
             lastTime = currentTime;
         }
 
@@ -171,6 +201,7 @@ public class Enemigos extends ObjetoJuego {
             if (vidaEnemigo <= 0) {
                 jugador1.incrementarEnemigosDerrotados();
                 System.out.println("Jugador 1 ha derrotado a un enemigo.");
+                estadoActual = Estado.MUERTO;
             }
 
             // Retroceso enemigo
@@ -179,7 +210,6 @@ public class Enemigos extends ObjetoJuego {
             posicion.setX(retroX);
             posicion.setY(retroY);
         }
-
 
         // Recibir daño de jugador 2
         if (isAttacking2 && dist2 < 30 && jugador2.getSalud() > 0) {
@@ -190,6 +220,7 @@ public class Enemigos extends ObjetoJuego {
             if (vidaEnemigo <= 0) {
                 jugador2.incrementarEnemigosDerrotados();
                 System.out.println("Jugador 2 ha derrotado a un enemigo.");
+                estadoActual = Estado.MUERTO;
             }
 
             // Retroceso enemigo
@@ -202,9 +233,26 @@ public class Enemigos extends ObjetoJuego {
 
     @Override
     public void draw(Graphics g) {
-        BufferedImage frame = (walk != null)
-                ? (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex])
-                : texture;
+        BufferedImage frame;
+
+        switch (estadoActual) {
+            case ATACANDO:
+                frame = (attack != null)
+                        ? (orientacionDerecha ? attack[attackIndex] : attackFlipped[attackIndex])
+                        : (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex]);
+                break;
+            case MUERTO:
+                frame = (dead != null)
+                        ? (orientacionDerecha ? dead[1] : deadFlipped[1]) : (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex]);
+                break;
+            case CAMINANDO:
+            default:
+                frame = (walk != null)
+                        ? (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex])
+                        : texture;
+                break;
+        }
+
         g.drawImage(frame, (int) posicion.getX(), (int) posicion.getY(), null);
     }
 }

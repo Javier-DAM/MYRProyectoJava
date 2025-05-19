@@ -11,8 +11,6 @@ public class Jugador extends ObjetoJuego {
     private float velocidad = 3.0f;
     private int enemigosDerrotados = 0;
 
-
-
     public Jugador(int id, Vector2D posicion, BufferedImage[] sprites) {
         super(posicion, sprites);
         this.id = id;
@@ -44,7 +42,7 @@ public class Jugador extends ObjetoJuego {
         if (Teclado.izquierda) posicion.setX(posicion.getX() - velocidad);
         if (Teclado.derecha) posicion.setX(posicion.getX() + velocidad);
 
-// Limitar en eje X
+        // Limitar en eje X
         if (posicion.getX() < 0) {
             posicion.setX(0);
         } else if (posicion.getX() > 1792) {
@@ -52,12 +50,11 @@ public class Jugador extends ObjetoJuego {
         }
 
 // Limitar en eje Y
-        if (posicion.getY() < 0) {
-            posicion.setY(0);
-        } else if (posicion.getY() > 952) {
-            posicion.setY(952);
+        if (posicion.getY() < -50) {
+            posicion.setY(-50);
+        } else if (posicion.getY() > 850) {
+            posicion.setY(850);
         }
-
     }
 
     // Igual para jugador 2
@@ -77,13 +74,12 @@ public class Jugador extends ObjetoJuego {
             posicion.setX(1792);
         }
 
-// Limitar en Y
-        if (posicion.getY() < 0) {
-            posicion.setY(0);
-        } else if (posicion.getY() > 952) {
-            posicion.setY(952);
+// Limitar en eje Y
+        if (posicion.getY() < -50) {
+            posicion.setY(-50);
+        } else if (posicion.getY() > 850) {
+            posicion.setY(850);
         }
-
     }
 
     public void recibirDaño(int cantidad) {

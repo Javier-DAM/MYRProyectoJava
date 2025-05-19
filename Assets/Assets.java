@@ -132,7 +132,6 @@ public class Assets {
         return result;
     }
 
-
     private static BufferedImage[] flipSprites(BufferedImage[] originals) {
         BufferedImage[] flipped = new BufferedImage[originals.length];
         for (int i = 0; i < originals.length; i++) {
@@ -152,5 +151,4 @@ public class Assets {
         g.dispose();
         return flipped;
     }
-
 }
