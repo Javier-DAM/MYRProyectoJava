@@ -7,17 +7,13 @@ import java.awt.image.BufferedImage;
 
 public class Jugador extends ObjetoJuego {
     private int id;
-    private int salud = 30;
-    private float velocidad = 3.0f;
+    private int salud = 10;
+    private float velocidad = 2.75f;
     private int enemigosDerrotados = 0;
 
     public Jugador(int id, Vector2D posicion, BufferedImage[] sprites) {
         super(posicion, sprites);
         this.id = id;
-    }
-
-    public float getVelocidad() {
-        return velocidad;
     }
 
     public int getSalud(){
@@ -84,7 +80,7 @@ public class Jugador extends ObjetoJuego {
 
     public void recibirDaño(int cantidad) {
         salud -= cantidad;
-        System.out.println("¡Jugador " + id + " recibió " + cantidad + " de daño! Salud restante: " + salud);
+        System.out.println("Jugador " + id + " recibió " + cantidad + " de daño - Salud restante: " + salud);
         if (salud <= 0) {
             System.out.println("Jugador " + id + " ha muerto.");
         }

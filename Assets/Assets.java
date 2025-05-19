@@ -103,8 +103,8 @@ public class Assets {
         jellyIdle2 = sliceSheet(idle2SheetJelly, 7);
         jellyWalk = sliceSheet(walkSheetJelly, 13);
         jellyRun = sliceSheet(runSheetJelly, 9);
-        jellyAttack = sliceSheet(attackSheetJelly, 6);
-        jellyDead = sliceSheet(deadSheetJelly, 2);
+        jellyAttack = sliceSheet(attackSheetJelly, 7);
+        jellyDead = sliceSheet(deadSheetJelly, 3);
 
         jellyIdle1Flipped = flipSprites(jellyIdle1);
         jellyIdle2Flipped = flipSprites(jellyIdle2);
@@ -125,7 +125,7 @@ public class Assets {
             if (x + frameWidth <= sheet.getWidth()) {
                 result[i] = sheet.getSubimage(x, 0, frameWidth, frameHeight);
             } else {
-                System.err.println("sliceSheet: fuera de rango en frame " + i + " -> x=" + x + " ancho=" + frameWidth);
+                System.err.println("sliceSheet: fuera de rango en frame " + i + " x=" + x + " ancho=" + frameWidth);
                 result[i] = null;
             }
         }

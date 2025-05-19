@@ -20,7 +20,6 @@ public class Window extends JFrame implements Runnable {
     private BufferStrategy bs;
     private Teclado teclado;
     private Jugador jugador1, jugador2;
-    private Enemigos enemigo1, enemigo2, enemigo3, enemigo4;
     private List<Enemigos> enemigosList;
     private EstadoDelJuego estadoDelJuego;
     private int averagefps;
@@ -39,16 +38,17 @@ public class Window extends JFrame implements Runnable {
     private long delay = 100;
     private int attackDelay = 100;
     private long lastEnemySpawnTime = 0;
-    private long enemySpawnDelay = 3000;
+    private long enemySpawnDelay = 500;
+    public int enemigosAtacando = 0;
 
     //Para pausar el juego
     private Menu menu;
 
     public Window() {
-        setTitle("Juego");
+        setTitle("モナとローナの魂");
         setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
+        setResizable(true);
         setLocationRelativeTo(null);
 
         canvas = new Canvas();
@@ -77,7 +77,7 @@ public class Window extends JFrame implements Runnable {
         }
 
         // Spawneo infinito de enemigos
-        if (System.currentTimeMillis() - lastEnemySpawnTime >= enemySpawnDelay) {
+        if (System.currentTimeMillis() - lastEnemySpawnTime >= enemySpawnDelay && enemigosAtacando < 120) {
             spawnEnemigo();
             lastEnemySpawnTime = System.currentTimeMillis();
         }
@@ -89,14 +89,26 @@ public class Window extends JFrame implements Runnable {
         long currentTime = System.currentTimeMillis();
 
         //Actualizar enemigos
-        for (Enemigos enemigo : enemigosList) {
+        for (int i = enemigosList.size() - 1; i >= 0; i--) {
+            Enemigos enemigo = enemigosList.get(i);
             enemigo.setIsAttacking1(isAttacking1);
             enemigo.setIsAttacking2(isAttacking2);
-            enemigo.setIsBlocking1(isBlocking1);  // Añade esto
-            enemigo.setIsBlocking2(isBlocking2);  // Añade esto
+            enemigo.setIsBlocking1(isBlocking1);
+            enemigo.setIsBlocking2(isBlocking2);
             enemigo.update();
-        }
 
+            if (enemigo.isDeathAnimationComplete()) {
+                enemigosList.remove(i);
+                enemigosAtacando--;
+
+                // Dar puntos al jugador correspondiente
+                if (isAttacking1 && jugador1.getSalud() > 0) {
+                    jugador1.incrementarEnemigosDerrotados();
+                } else if (isAttacking2 && jugador2.getSalud() > 0) {
+                    jugador2.incrementarEnemigosDerrotados();
+                }
+            }
+        }
 
     // =========== Ataque y bloqueo ===========
         // MONA (Jugador 1)
@@ -171,7 +183,6 @@ public class Window extends JFrame implements Runnable {
             isBlocking2 = false;
         }
 
-
         // ACTUALIZACIÓN DE ANIMACIONES
         if (currentTime - lastTime > delay) {
             if (!isAttacking1 && !isBlocking1 && (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha)) {
@@ -224,7 +235,7 @@ public class Window extends JFrame implements Runnable {
             return;
         }
 
-        // Crear una lista de objetos dibujables ordenables por Y
+        // Crear una lista de objetos dibujables ordenables por Y (Profundidad del 2D)
         List<ObjetoJuego> entidadesOrdenadas = new ArrayList<>();
         entidadesOrdenadas.add(jugador1);
         entidadesOrdenadas.add(jugador2);
@@ -235,42 +246,81 @@ public class Window extends JFrame implements Runnable {
         // Dibujar en orden de Y
         for (ObjetoJuego obj : entidadesOrdenadas) {
             if (obj instanceof Jugador jugador) {
+                //Obtener posiciones y pasarlo a enteros
                 int x = (int) jugador.getPosicion().getX();
                 int y = (int) jugador.getPosicion().getY();
+
+                //Ver qué acción se realiza
                 boolean orientacion = (jugador == jugador1) ? j1orientacion : j2orientacion;
                 boolean atacando = (jugador == jugador1) ? isAttacking1 : isAttacking2;
                 boolean bloqueando = (jugador == jugador1) ? isBlocking1 : isBlocking2;
+
                 int ataqueIndex = (jugador == jugador1) ? attackIndex1 : attackIndex2;
                 int idleIndex = (jugador == jugador1) ? idleIndex1 : idleIndex2;
                 int walkIndex = (jugador == jugador1) ? walkIndex1 : walkIndex2;
                 int dialogueIndex = (jugador == jugador1) ? dialogueIndex1 : dialogueIndex2;
 
-                if (jugador.getSalud() < 0) {
-                    g.drawImage(orientacion ? (jugador == jugador1 ? Assets.monaDialogue[dialogueIndex] : Assets.ronaDialogue[dialogueIndex])
-                                    : (jugador == jugador1 ? Assets.monaDialogueFlipped[dialogueIndex] : Assets.ronaDialogueFlipped[dialogueIndex]),
-                            x, y, null);
-                } else {
-                    if (atacando) {
-                        g.drawImage(orientacion
-                                        ? (jugador == jugador1 ? Assets.monaAttack[ataqueIndex] : Assets.ronaAttack[ataqueIndex])
-                                        : (jugador == jugador1 ? Assets.monaAttackFlipped[ataqueIndex] : Assets.ronaAttackFlipped[ataqueIndex]),
-                                x, y, null);
-                    } else if (bloqueando) {
-                        g.drawImage(orientacion
-                                        ? (jugador == jugador1 ? Assets.monaProtection[1] : Assets.ronaProtection[1])
-                                        : (jugador == jugador1 ? Assets.monaProtectionFlipped[1] : Assets.ronaProtectionFlipped[1]),
-                                x, y, null);
-                    } else if ((jugador == jugador1 && (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha)) ||
-                            (jugador == jugador2 && (Teclado.arriba2 || Teclado.abajo2 || Teclado.izquierda2 || Teclado.derecha2))) {
-                        g.drawImage(orientacion
-                                        ? (jugador == jugador1 ? Assets.monaWalk[walkIndex] : Assets.ronaWalk[walkIndex])
-                                        : (jugador == jugador1 ? Assets.monaWalkFlipped[walkIndex] : Assets.ronaWalkFlipped[walkIndex]),
+                // Verifica si la salud del Jugador 1 (Mona) es 0 o menos
+                if (jugador == jugador1) {
+                    if (jugador.getSalud() <= 0) {
+                        // Mostrar diálogo de muerte (mirando a la derecha o izquierda según orientación)
+                        g.drawImage(orientacion ? Assets.monaProtection[1]
+                                        : Assets.monaProtectionFlipped[1],
                                 x, y, null);
                     } else {
-                        g.drawImage(orientacion
-                                        ? (jugador == jugador1 ? Assets.monaIdle[idleIndex] : Assets.ronaIdle[idleIndex])
-                                        : (jugador == jugador1 ? Assets.monaIdleFlipped[idleIndex] : Assets.ronaIdleFlipped[idleIndex]),
+                        if (atacando) {
+                            // Mostrar animación de ataque de Mona
+                            g.drawImage(orientacion ? Assets.monaAttack[ataqueIndex]
+                                            : Assets.monaAttackFlipped[ataqueIndex],
+                                    x, y, null);
+                        } else if (bloqueando) {
+                            // Mostrar animación de bloqueo de Mona
+                            g.drawImage(orientacion ? Assets.monaProtection[1]
+                                            : Assets.monaProtectionFlipped[1],
+                                    x, y, null);
+                        } else if (Teclado.arriba || Teclado.abajo || Teclado.izquierda || Teclado.derecha) {
+                            // Mostrar animación de caminar de Mona
+                            g.drawImage(orientacion ? Assets.monaWalk[walkIndex]
+                                            : Assets.monaWalkFlipped[walkIndex],
+                                    x, y, null);
+                        } else {
+                            // Mostrar animación de espera (idle) de Mona
+                            g.drawImage(orientacion ? Assets.monaIdle[idleIndex]
+                                            : Assets.monaIdleFlipped[idleIndex],
+                                    x, y, null);
+                        }
+                    }
+                }
+
+                // Verifica si la salud del Jugador 2 (Rona) es 0 o menos
+                if (jugador == jugador2) {
+                    if (jugador.getSalud() <= 0) {
+                        // Mostrar diálogo de muerte de Rona
+                        g.drawImage(orientacion ? Assets.ronaProtection[2]
+                        : Assets.ronaDialogueFlipped[2],
                                 x, y, null);
+                    } else {
+                        if (atacando) {
+                            // Mostrar animación de ataque de Rona
+                            g.drawImage(orientacion ? Assets.ronaAttack[ataqueIndex]
+                                            : Assets.ronaAttackFlipped[ataqueIndex],
+                                    x, y, null);
+                        } else if (bloqueando) {
+                            // Mostrar animación de bloqueo de Rona
+                            g.drawImage(orientacion ? Assets.ronaProtection[1]
+                                            : Assets.ronaProtectionFlipped[1],
+                                    x, y, null);
+                        } else if (Teclado.arriba2 || Teclado.abajo2 || Teclado.izquierda2 || Teclado.derecha2) {
+                            // Mostrar animación de caminar de Rona
+                            g.drawImage(orientacion ? Assets.ronaWalk[walkIndex]
+                                            : Assets.ronaWalkFlipped[walkIndex],
+                                    x, y, null);
+                        } else {
+                            // Mostrar animación de espera (idle) de Rona
+                            g.drawImage(orientacion ? Assets.ronaIdle[idleIndex]
+                                            : Assets.ronaIdleFlipped[idleIndex],
+                                    x, y, null);
+                        }
                     }
                 }
             } else {
@@ -297,19 +347,19 @@ public class Window extends JFrame implements Runnable {
         g.setFont(new Font("Tahoma", Font.BOLD, 10));
         g.drawString("FPS: " + averagefps, 10, 10);
         g.setFont(new Font("Tahoma", Font.BOLD, 15));
-        g.drawString("Jugador 1: Caminar: WASD Atacar: V Bloquear: B", 10, 30);
-        g.drawString("Jugador 2: Caminar: ↑↓→← Atacar: , Bloquear: .", 10, 50);
+        g.drawString("Jugador 1: Caminar: WASD Atacar: V Bloquear: B - Puntaje: "+ jugador1.getEnemigosDerrotados(), 10, 30);
+        g.drawString("Jugador 2: Caminar: ↑↓→← Atacar: , Bloquear: . - Puntaje: "+ jugador2.getEnemigosDerrotados(), 10, 50);
         g.setFont(new Font("Arial", Font.BOLD, 15));
 
         if (vidaP1 > 0){
-            g.drawString( "Vida"+vidaP1, x1, y1);
+            g.drawString( "Vida "+vidaP1, x1+35, y1+50);
         }else {
-            g.drawString( "Jugador 1 muerto", x1, y1);
+            g.drawString( "Muerto ", x1+35, y1+50);
         }
         if (vidaP2 > 0){
-            g.drawString( "Vida"+vidaP2, x2, y2);
+            g.drawString( "Vida "+vidaP2, x2+35, y2+50);
         }else {
-            g.drawString( "Jugador 2 muerto", x2, y2);
+            g.drawString( "Muerto ", x2+35, y2+50);
         }
     }
 
@@ -325,6 +375,9 @@ public class Window extends JFrame implements Runnable {
         enemigosList = new ArrayList<>();
     }
 
+    /**
+     * Método para reiniciar el juego
+     */
     private void reiniciarJuego() {
         // Reiniciar jugadores
         jugador1 = new Jugador(1, new Vector2D(width / 2 - 32, height / 2 - 32), Assets.monaIdle);
@@ -337,6 +390,37 @@ public class Window extends JFrame implements Runnable {
         // Reset del estado del juego y menú
         estadoDelJuego = new EstadoDelJuego();
         menu.setJuegoTerminado(false);
+    }
+
+    /**
+     * Método para spawnear enemigos aleatorios
+     */
+    private void spawnEnemigo() {
+        enemigosAtacando++;
+        Random rand = new Random();
+        Vector2D nuevaPos = new Vector2D(rand.nextInt(width - 10), rand.nextInt(height - 10));
+
+        Enemigos enemigo;
+        if (rand.nextBoolean()) {
+            enemigo = new Enemigos(nuevaPos, Assets.foxyIdle, "foxy");
+            enemigo.setWalkSprites(Assets.foxyWalk, Assets.foxyWalkFlipped);
+            enemigo.setAttackSprites(Assets.foxyAttack, Assets.foxyAttackFlipped);
+            enemigo.setDeadSprites(Assets.foxyDead, Assets.foxyDeadFlipped);
+        } else {
+            enemigo = new Enemigos(nuevaPos, Assets.jellyIdle1, "jelly");
+            enemigo.setWalkSprites(Assets.jellyWalk, Assets.jellyWalkFlipped);
+            enemigo.setAttackSprites(Assets.jellyAttack, Assets.jellyAttackFlipped);
+            enemigo.setDeadSprites(Assets.jellyDead, Assets.jellyDeadFlipped);
+        }
+
+        enemigo.setJugador1(jugador1);
+        enemigo.setJugador2(jugador2);
+
+        float velocidadAleatoria = 1.0f + rand.nextFloat() * 2.0f;
+        enemigo.setSpeed(velocidadAleatoria);
+
+        enemigosList.add(enemigo);
+
     }
 
 
@@ -384,31 +468,5 @@ public class Window extends JFrame implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-    }
-
-    private void spawnEnemigo() {
-        Random rand = new Random();
-        Vector2D nuevaPos = new Vector2D(rand.nextInt(width-10), rand.nextInt(height-10));
-
-        Enemigos enemigo;
-        if (rand.nextBoolean()) {
-            enemigo = new Enemigos(nuevaPos, Assets.foxyIdle);
-            enemigo.setWalkSprites(Assets.foxyWalk, Assets.foxyWalkFlipped);
-            enemigo.setAttackSprites(Assets.foxyAttack, Assets.foxyAttackFlipped);
-            enemigo.setDeadSprites(Assets.foxyDead, Assets.foxyDeadFlipped);
-        } else {
-            enemigo = new Enemigos(nuevaPos, Assets.jellyIdle1);
-            enemigo.setWalkSprites(Assets.jellyWalk, Assets.jellyWalkFlipped);
-            enemigo.setAttackSprites(Assets.jellyAttack, Assets.jellyAttackFlipped);
-            enemigo.setDeadSprites(Assets.jellyDead, Assets.jellyDeadFlipped);
-        }
-
-        enemigo.setJugador1(jugador1);
-        enemigo.setJugador2(jugador2);
-
-        float velocidadAleatoria = 1.0f + rand.nextFloat() * 2.0f;
-        enemigo.setSpeed(velocidadAleatoria);
-
-        enemigosList.add(enemigo);
     }
 }

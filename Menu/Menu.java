@@ -10,11 +10,10 @@ public class Menu {
     private boolean startRequests = false;
     private Teclado teclado;
     private boolean pausa = true;
-    private boolean enterPresionadoAnteriormente = true;
+    private boolean enterPresionadoAnteriormente = false;
     private boolean iniciado = false;
     private boolean juegoTerminado = false;
     private boolean reiniciarSolicitado = false;
-    private Jugador jugador1, jugador2;
 
     public Menu(Teclado teclado) {
         this.teclado = teclado;
@@ -23,13 +22,12 @@ public class Menu {
     public void update() {
         if (teclado.enter && !enterPresionadoAnteriormente) {
             if (!juegoTerminado) {
-                pausa = !pausa;
-
                 if (!iniciado) {
                     iniciado = true;
+                    pausa = false;  // Empieza el juego al presionar Enter por primera vez
+                } else {
+                    pausa = !pausa;  // Alterna entre pausa y continuar en posteriores pulsaciones
                 }
-
-                System.out.println(pausa ? "Juego pausado" : "Juego reanudado");
             }
             enterPresionadoAnteriormente = true;
         } else if (!teclado.enter) {
@@ -99,20 +97,17 @@ public class Menu {
         fm = g.getFontMetrics();
         String resultado;
 
-        if (jugador1.getSalud() <= 0 && jugador2.getSalud() > 0) {
-            resultado = "Jugador 2 ha ganado";
-        } else if (jugador2.getSalud() <= 0 && jugador1.getSalud() > 0) {
-            resultado = "Jugador 1 ha ganado";
+        // Obtener la cantidad de enemigos derrotados por cada jugador
+        int kills1 = jugador1.getEnemigosDerrotados();
+        int kills2 = jugador2.getEnemigosDerrotados();
+
+        // Comparar y determinar el resultado en base a los enemigos derrotados
+        if (kills1 > kills2) {
+            resultado = "Jugador 1 ha ganado (más enemigos derrotados)";
+        } else if (kills2 > kills1) {
+            resultado = "Jugador 2 ha ganado (más enemigos derrotados)";
         } else {
-            int kills1 = jugador1.getEnemigosDerrotados();
-            int kills2 = jugador2.getEnemigosDerrotados();
-            if (kills1 > kills2) {
-                resultado = "Jugador 1 ha ganado (más enemigos derrotados)";
-            } else if (kills2 > kills1) {
-                resultado = "Jugador 2 ha ganado (más enemigos derrotados)";
-            } else {
-                resultado = "Empate";
-            }
+            resultado = "Empate";
         }
 
         g.drawString(resultado, (width - fm.stringWidth(resultado)) / 2, 350);
@@ -120,13 +115,13 @@ public class Menu {
         // Estadísticas
         g.setFont(new Font("Arial", Font.PLAIN, 25));
         fm = g.getFontMetrics();
-        String score1 = "Jugador 1 eliminó: " + jugador1.getEnemigosDerrotados();
-        String score2 = "Jugador 2 eliminó: " + jugador2.getEnemigosDerrotados();
-        String reinicio = "Presiona Enter para reiniciar";
+        String puntaje1 = "Jugador 1 eliminó: " + jugador1.getEnemigosDerrotados();
+        String puntaje2 = "Jugador 2 eliminó: " + jugador2.getEnemigosDerrotados();
+        String mensajeReinicio = "Presiona Enter para reiniciar";
 
-        g.drawString(score1, (width - fm.stringWidth(score1)) / 2, 390);
-        g.drawString(score2, (width - fm.stringWidth(score2)) / 2, 420);
-        g.drawString(reinicio, (width - fm.stringWidth(reinicio)) / 2, 460);
+        g.drawString(puntaje1, (width - fm.stringWidth(puntaje1)) / 2, 390);
+        g.drawString(puntaje2, (width - fm.stringWidth(puntaje2)) / 2, 420);
+        g.drawString(mensajeReinicio, (width - fm.stringWidth(mensajeReinicio)) / 2, 460);
     }
 }
 

@@ -7,8 +7,9 @@ import java.util.Random;
 public class Enemigos extends ObjetoJuego {
     private float speed = 1.5f;
     private Jugador jugador1, jugador2;
+    private String tipo; // "foxy" o "jelly"
 
-    private int cooldownDelAtaque = 60;
+    private int cooldownDelAtaque = 100;
     private int temporizadorDeAtaque = 0;
 
     private BufferedImage[] walk;
@@ -21,13 +22,20 @@ public class Enemigos extends ObjetoJuego {
     private int walkIndex = 0;
     private int attackIndex = 0;
     private long lastTime = System.currentTimeMillis();
-    private long delay = 100;
+    private long delay = 90;
 
-    private int vidaEnemigo = 10;
+    private int vidaEnemigo = 7;
 
     private boolean isAttacking1 = false, isAttacking2 = false, isBlocking1 = false, isBlocking2 = false, recibiendoDaño = false;
     private int temporizadorDeDaño = 0;
     private int cooldownDeDaño = 20;
+
+    // Variables para animación de muerte
+    private int currentDeadFrame = 0;
+    private long deadFrameStartTime;
+    private final long deadFrameDuration = 300; // 300ms por frame
+    private boolean deathAnimationComplete = false;
+    private boolean deathAnimationStarted = false;
 
     // Estados del enemigo
     private enum Estado {
@@ -35,28 +43,9 @@ public class Enemigos extends ObjetoJuego {
     }
     private Estado estadoActual = Estado.CAMINANDO;
 
-    public void setIsAttacking1(boolean attacking) {
-        this.isAttacking1 = attacking;
-    }
-
-    public void setIsAttacking2(boolean attacking) {
-        this.isAttacking2 = attacking;
-    }
-
-    public void setIsBlocking1(boolean blocking) {
-        this.isBlocking1 = blocking;
-    }
-
-    public void setIsBlocking2(boolean blocking) {
-        this.isBlocking2 = blocking;
-    }
-
-    public void setSpeed(float speed) {
-        this.speed = speed;
-    }
-
-    public Enemigos(Vector2D posicion, BufferedImage[] texture) {
+    public Enemigos(Vector2D posicion, BufferedImage[] texture, String tipo) {
         super(posicion, texture);
+        this.tipo = tipo;
     }
 
     public void setWalkSprites(BufferedImage[] walk, BufferedImage[] walkFlipped) {
@@ -82,12 +71,33 @@ public class Enemigos extends ObjetoJuego {
         this.jugador2 = jugador2;
     }
 
+    public void setIsAttacking1(boolean attacking) {
+        this.isAttacking1 = attacking;
+    }
+
+    public void setIsAttacking2(boolean attacking) {
+        this.isAttacking2 = attacking;
+    }
+
+    public void setIsBlocking1(boolean blocking) {
+        this.isBlocking1 = blocking;
+    }
+
+    public void setIsBlocking2(boolean blocking) {
+        this.isBlocking2 = blocking;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
     @Override
     public void update() {
         if (jugador1 == null && jugador2 == null) return;
 
         if (vidaEnemigo <= 0) {
             estadoActual = Estado.MUERTO;
+            updateDeathAnimation();
             return;
         }
 
@@ -149,7 +159,6 @@ public class Enemigos extends ObjetoJuego {
                     double retroY = y - (dy1 / dist1) * 60;
                     posicion.setX(retroX);
                     posicion.setY(retroY);
-                    System.out.println("Jugador 1 bloqueó el ataque. Enemigo retrocede.");
                 } else {
                     jugador1.recibirDaño(r.nextInt(3) + 1);
                     temporizadorDeAtaque = cooldownDelAtaque;
@@ -162,7 +171,6 @@ public class Enemigos extends ObjetoJuego {
                     double retroY = y - (dy2 / dist2) * 60;
                     posicion.setX(retroX);
                     posicion.setY(retroY);
-                    System.out.println("Jugador 2 bloqueó el ataque. Enemigo retrocede.");
                 } else {
                     jugador2.recibirDaño(r.nextInt(3) + 1);
                     temporizadorDeAtaque = cooldownDelAtaque;
@@ -194,13 +202,11 @@ public class Enemigos extends ObjetoJuego {
 
         // Recibir daño de jugador 1
         if (isAttacking1 && dist1 < 30 && jugador1.getSalud() > 0) {
-            vidaEnemigo -= 2;
+            vidaEnemigo = vidaEnemigo - (r.nextInt(5) + 1);
             temporizadorDeDaño = cooldownDeDaño;
-            System.out.println("Enemigo recibió daño de Jugador 1. Vida restante: " + vidaEnemigo);
 
             if (vidaEnemigo <= 0) {
                 jugador1.incrementarEnemigosDerrotados();
-                System.out.println("Jugador 1 ha derrotado a un enemigo.");
                 estadoActual = Estado.MUERTO;
             }
 
@@ -215,11 +221,9 @@ public class Enemigos extends ObjetoJuego {
         if (isAttacking2 && dist2 < 30 && jugador2.getSalud() > 0) {
             vidaEnemigo -= 2;
             temporizadorDeDaño = cooldownDeDaño;
-            System.out.println("Enemigo recibió daño de Jugador 2. Vida restante: " + vidaEnemigo);
 
             if (vidaEnemigo <= 0) {
                 jugador2.incrementarEnemigosDerrotados();
-                System.out.println("Jugador 2 ha derrotado a un enemigo.");
                 estadoActual = Estado.MUERTO;
             }
 
@@ -231,28 +235,67 @@ public class Enemigos extends ObjetoJuego {
         }
     }
 
+    private void updateDeathAnimation() {
+        if (!deathAnimationStarted) {
+            deathAnimationStarted = true;
+            deadFrameStartTime = System.currentTimeMillis();
+            currentDeadFrame = 0;
+            return;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        if (currentTime - deadFrameStartTime >= deadFrameDuration) {
+            currentDeadFrame++;
+            deadFrameStartTime = currentTime;
+
+            int maxFrames = "jelly".equals(tipo) ? 3 : 2;
+            if (currentDeadFrame >= maxFrames) {
+                deathAnimationComplete = true;
+                currentDeadFrame = maxFrames - 1;
+            }
+        }
+    }
+
+    private BufferedImage getCurrentDeathFrame() {
+        if (dead == null || dead.length == 0) return null;
+
+        int frameToShow = Math.min(currentDeadFrame, dead.length - 1);
+        return orientacionDerecha ? dead[frameToShow] : deadFlipped[frameToShow];
+    }
+
     @Override
     public void draw(Graphics g) {
-        BufferedImage frame;
+        BufferedImage frame = null;
 
         switch (estadoActual) {
             case ATACANDO:
-                frame = (attack != null)
-                        ? (orientacionDerecha ? attack[attackIndex] : attackFlipped[attackIndex])
-                        : (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex]);
+                if (attack != null && attack.length > 0) {
+                    frame = orientacionDerecha ? attack[attackIndex] : attackFlipped[attackIndex];
+                } else {
+                    frame = orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex];
+                }
                 break;
+
             case MUERTO:
-                frame = (dead != null)
-                        ? (orientacionDerecha ? dead[1] : deadFlipped[1]) : (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex]);
+                frame = getCurrentDeathFrame();
                 break;
+
             case CAMINANDO:
             default:
-                frame = (walk != null)
-                        ? (orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex])
-                        : texture;
+                if (walk != null && walk.length > 0) {
+                    frame = orientacionDerecha ? walk[walkIndex] : walkFlipped[walkIndex];
+                } else {
+                    frame = texture;
+                }
                 break;
         }
 
-        g.drawImage(frame, (int) posicion.getX(), (int) posicion.getY(), null);
+        if (frame != null) {
+            g.drawImage(frame, (int) posicion.getX(), (int) posicion.getY(), null);
+        }
+    }
+
+    public boolean isDeathAnimationComplete() {
+        return deathAnimationComplete;
     }
 }

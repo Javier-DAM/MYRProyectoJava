@@ -1,10 +1,22 @@
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
-
         Window ventana = new Window();
-        Scanner sc = new Scanner(System.in);
         ventana.iniciarJuego();
     }
 }
+
+/**
+ * Cosas restantes:
+ *
+ *  ================ Prioridad ================
+ *  - Añadir un fondo.
+ *  - Comentar líneas de código.
+ *
+ *   ================ No prioritarias ================
+ *   - Arreglar textos, hacerlos más legibles.
+ *   - Que no se superponga sobre la barra de tareas la aplicación.
+ *
+ *    ================ Extras por añadir ================
+ *    - Añadir más enemigos.
+ *    - Elegir entre 1 o 2 jugadores
+ */
