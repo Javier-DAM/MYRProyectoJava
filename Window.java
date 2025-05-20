@@ -10,6 +10,8 @@ import java.util.Random;
 import javax.swing.*;
 import Menu.Menu;
 
+import static Assets.Assets.fondoImagen;
+
 public class Window extends JFrame implements Runnable {
 
     public static final int width = 1920, height = 1080;
@@ -45,6 +47,7 @@ public class Window extends JFrame implements Runnable {
     private Menu menu;
 
     public Window() {
+
         setTitle("モナとローナの魂");
         setSize(width, height);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -62,6 +65,7 @@ public class Window extends JFrame implements Runnable {
         add(canvas);
 
         setVisible(true);
+
     }
 
     public void iniciarJuego() {
@@ -212,14 +216,18 @@ public class Window extends JFrame implements Runnable {
 
     private void draw() {
         bs = canvas.getBufferStrategy();
+
         if (bs == null) {
             canvas.createBufferStrategy(3);
             return;
         }
 
+
+
         g = bs.getDrawGraphics();
-        g.setColor(new Color(75, 139, 59));
-        g.fillRect(0, 0, width, height);
+        // Dibuja la imagen de fondo
+        g.drawImage(fondoImagen, 0, 0, width, height, null);
+
 
         if (menu.isPaused()) {
             menu.draw(g);

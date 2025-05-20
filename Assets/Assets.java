@@ -1,7 +1,8 @@
 package Assets;
 
+import javax.swing.*;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 
 public class Assets {
@@ -32,8 +33,9 @@ public class Assets {
     public static BufferedImage[] jellyRun, jellyRunFlipped;
     public static BufferedImage[] jellyAttack, jellyAttackFlipped;
     public static BufferedImage[] jellyDead, jellyDeadFlipped;
-
+    public static Image fondoImagen;
     public static void init() {
+        fondoImagen = new ImageIcon(Assets.class.getResource("/Assets/Sprites/Fondo/césped.png")).getImage();
         //Mona Assets
         BufferedImage idleSheetMona = Loader.loadImage("Assets/Sprites/Mona/Idle.png");
         BufferedImage walkSheetMona = Loader.loadImage("Assets/Sprites/Mona/Walk.png");
