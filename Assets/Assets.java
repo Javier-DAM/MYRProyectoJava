@@ -34,6 +34,10 @@ public class Assets {
     public static BufferedImage[] jellyAttack, jellyAttackFlipped;
     public static BufferedImage[] jellyDead, jellyDeadFlipped;
     public static Image fondoImagen;
+
+    /**
+     * Inicializa todos los Assets e indica el tamaño total de los assets
+     */
     public static void init() {
         fondoImagen = new ImageIcon(Assets.class.getResource("/Assets/Sprites/Fondo/césped.png")).getImage();
         //Mona Assets
@@ -116,6 +120,12 @@ public class Assets {
         jellyDeadFlipped = flipSprites(jellyDead);
     }
 
+    /**
+     * Metodo que se encarga de dividir los assets recibiendo su tamaño
+     * @param sheet indentificador del asset
+     * @param frames es el tamaño a diviir del asset
+     * @return y devuelve el array de las imagenes ya cortadas
+     */
     private static BufferedImage[] sliceSheet(BufferedImage sheet, int frames) {
         BufferedImage[] result = new BufferedImage[frames];
         int frameWidth = sheet.getWidth() / frames;
@@ -134,6 +144,11 @@ public class Assets {
         return result;
     }
 
+    /**
+     * Este método se encarga de llamar al metodo de voltar la imagen y cuando la voltea, guarda la imagen en un array
+     * @param originals sprite con la orientación original
+     * @return devuelve el array ya girado
+     */
     private static BufferedImage[] flipSprites(BufferedImage[] originals) {
         BufferedImage[] flipped = new BufferedImage[originals.length];
         for (int i = 0; i < originals.length; i++) {
@@ -142,6 +157,11 @@ public class Assets {
         return flipped;
     }
 
+    /**
+     *se va a encargar de voltar imagen por imagen
+     * @param img es la imagen que recibe la imagen que declaramos arriba
+     * @return devuelve la imagen voltada
+     */
     public static BufferedImage flipImage(BufferedImage img) {
         int w = img.getWidth();
         int h = img.getHeight();

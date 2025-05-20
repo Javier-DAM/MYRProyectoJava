@@ -91,6 +91,9 @@ public class Enemigos extends ObjetoJuego {
         this.speed = speed;
     }
 
+    /**
+     * Va actualizar el estado de los enemigos
+     */
     @Override
     public void update() {
         if (jugador1 == null && jugador2 == null) return;
@@ -235,6 +238,9 @@ public class Enemigos extends ObjetoJuego {
         }
     }
 
+    /**
+     * Actualizar la animación de muerte de los enemigos
+     */
     private void updateDeathAnimation() {
         if (!deathAnimationStarted) {
             deathAnimationStarted = true;
@@ -256,6 +262,10 @@ public class Enemigos extends ObjetoJuego {
         }
     }
 
+    /**
+     * Define la orientacion del enemigo al morir y devuelve el frame de muerte de esa direccion
+     * @return devuelve la orientación del personaje
+     */
     private BufferedImage getCurrentDeathFrame() {
         if (dead == null || dead.length == 0) return null;
 
@@ -263,6 +273,10 @@ public class Enemigos extends ObjetoJuego {
         return orientacionDerecha ? dead[frameToShow] : deadFlipped[frameToShow];
     }
 
+    /**
+     * Dibuja todos los estados de los enemigos (atacando, moviendo, muerto )
+     * @param g esto se utiliza para llamar a graphics
+     */
     @Override
     public void draw(Graphics g) {
         BufferedImage frame = null;

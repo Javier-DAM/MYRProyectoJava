@@ -20,6 +20,9 @@ public class Jugador extends ObjetoJuego {
         return salud;
     }
 
+    /**
+     * Contador de los enemigos que mueren
+     */
     public void incrementarEnemigosDerrotados() {
         enemigosDerrotados++;
     }
@@ -28,7 +31,9 @@ public class Jugador extends ObjetoJuego {
         return enemigosDerrotados;
     }
 
-    // Actualizar método updateJugador1 usando velocidad
+    /**
+     * Actualizar método updateJugador1 usando velocidad
+     */
     public void updateJugador1() {
         if (salud < 1) return;
         if (Teclado.atacar || Teclado.bloquear) return;
@@ -53,7 +58,9 @@ public class Jugador extends ObjetoJuego {
         }
     }
 
-    // Igual para jugador 2
+    /**
+     * Actualizar método updateJugador2 usando velocidad
+     */
     public void updateJugador2() {
         if (salud < 1) return;
         if (Teclado.atacar2 || Teclado.bloquear2) return;
@@ -78,6 +85,10 @@ public class Jugador extends ObjetoJuego {
         }
     }
 
+    /**
+     * Metodo que hace que la salud del jugador baje cuando recibe daño
+     * @param cantidad cantidad de daño a recibir
+     */
     public void recibirDaño(int cantidad) {
         salud -= cantidad;
         System.out.println("Jugador " + id + " recibió " + cantidad + " de daño - Salud restante: " + salud);
@@ -86,13 +97,19 @@ public class Jugador extends ObjetoJuego {
         }
     }
 
+    /**
+     * Llma a los metodos update de los jugadores por su id
+     */
     @Override
     public void update() {
         if (id == 1) updateJugador1();
         else updateJugador2();
     }
 
-
+    /**
+     * Dibuja al jugador
+     * @param g esto se utiliza para llamar a graphics
+     */
     @Override
     public void draw(Graphics g) {
         g.drawImage(texture, (int) posicion.getX(), (int) posicion.getY(), null);

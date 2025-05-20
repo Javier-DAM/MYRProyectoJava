@@ -46,6 +46,9 @@ public class Window extends JFrame implements Runnable {
     //Para pausar el juego
     private Menu menu;
 
+    /**
+     * Metodo que crea la ventana y sus propiedades
+     */
     public Window() {
 
         setTitle("モナとローナの魂");
@@ -68,10 +71,17 @@ public class Window extends JFrame implements Runnable {
 
     }
 
+    /**
+     * Metono que inicia el juego
+     */
+
     public void iniciarJuego() {
          this.start();
     }
 
+    /**
+     * Metodo que actualiza cosas del juego (Menu, teclado, sprites, etc)
+     */
     private void update() {
         teclado.update();
         menu.update();
@@ -214,6 +224,9 @@ public class Window extends JFrame implements Runnable {
         }
     }
 
+    /**
+     * Método que controla todos los gráficos de la partida en el juego
+     */
     private void draw() {
         bs = canvas.getBufferStrategy();
 
@@ -341,6 +354,9 @@ public class Window extends JFrame implements Runnable {
         bs.show();
     }
 
+    /**
+     * Es lo que dibuja en pantalla los controles, vida y puntaje final de la partida
+     */
     private void textos() {
         int vidaP1 = jugador1.getSalud();
         int vidaP2 = jugador2.getSalud();
@@ -371,6 +387,9 @@ public class Window extends JFrame implements Runnable {
         }
     }
 
+    /**
+     * Este metodo iniciliza los jugadores y el array de los enemigos
+     */
     private void init() {
         menu = new Menu(teclado);
         Assets.init();
@@ -431,7 +450,9 @@ public class Window extends JFrame implements Runnable {
 
     }
 
-
+    /**
+     * Este metodo controla los frames y las actualizaciones por segundo del juego
+     */
     @Override
     public void run() {
         long now;
@@ -463,11 +484,18 @@ public class Window extends JFrame implements Runnable {
         stop();
     }
 
+    /**
+     * Inicia los hilo que tiene el juego
+     */
     private void start() {
         thread = new Thread(this);
         thread.start();
         running = true;
     }
+
+    /**
+     * Metodo  para detener el juego
+     */
 
     private void stop() {
         try {

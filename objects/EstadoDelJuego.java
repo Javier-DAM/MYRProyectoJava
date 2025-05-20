@@ -13,18 +13,16 @@ public class EstadoDelJuego {
         if (pausado) return;
     }
 
+    /**
+     * Dibuja que el juego está en pausa
+     * @param g esto se utiliza para llamar a graphics
+     */
     public void draw(Graphics g) {
         if (pausado) {
             g.drawString("Juego en Pausa", 800, 400);
         }
     }
 
-    public void pausar() {
-        pausado = !pausado;
-    }
 
-    public boolean isPausado() {
-        return pausado;
-    }
 }
 

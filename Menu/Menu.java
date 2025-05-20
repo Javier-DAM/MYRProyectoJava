@@ -19,6 +19,9 @@ public class Menu {
         this.teclado = teclado;
     }
 
+    /**
+     * Sirve para actualizar el estado del menu
+     */
     public void update() {
         if (teclado.enter && !enterPresionadoAnteriormente) {
             if (!juegoTerminado) {
@@ -35,36 +38,62 @@ public class Menu {
         }
     }
 
+    /**
+     * Sirve para levantar una bandera que reiniciara el juego una vez acabada la partida
+     */
     public void updateMuerte() {
         if (teclado.enter) {
             reiniciarSolicitado = true;
         }
     }
 
+    /**
+     * Es para saber si el juego esta en pausa
+     * @return devuelve un booleano dependiendo si esta en pausa o no
+     */
     public boolean isPaused() {
         return pausa;
     }
 
+    /**
+     * solicitiud para iniciar el juego
+     * @return devuelve un booleano
+     */
     public boolean isStartRequested() {
         return startRequests;
     }
 
+    /**
+     * Commprueba si el juego ha terminado
+     * @return devuelve una bandera que indica que el juego ha terminado
+     */
     public boolean isJuegoTerminado() {
         return juegoTerminado;
     }
+
 
     public void setJuegoTerminado(boolean juegoTerminado) {
         this.juegoTerminado = juegoTerminado;
     }
 
+    /**
+     * Commprueba si el jugador quiere reiniciar
+     * @return Una bandera que indica si se va a reiniciar
+     */
     public boolean isReiniciarSolicitado() {
         return reiniciarSolicitado;
     }
+
+
 
     public void resetReiniciarSolicitado() {
         this.reiniciarSolicitado = false;
     }
 
+    /**
+     * Dibuja el texto que contiene el menu
+     * @param g esto se utiliza para llamar a graphics
+     */
     public void draw(Graphics g) {
         g.setColor(new Color(0, 0, 0, 100));
         g.fillRect(0, 0, width, height);
@@ -79,6 +108,13 @@ public class Menu {
 
         g.drawString(texto, x, y);
     }
+
+    /**
+     * Dibujar el resultado de la partida cuando los dos personajes mueren
+     * @param g esto se utiliza para llamar a graphics
+     * @param jugador1 es el jugador 1
+     * @param jugador2 es el jugador 2
+     */
 
     public void drawMuerte(Graphics g, Jugador jugador1, Jugador jugador2) {
         g.setColor(new Color(0, 0, 0, 150));

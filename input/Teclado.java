@@ -26,7 +26,9 @@ public class Teclado implements KeyListener {
     public static boolean enter = false;
     public static boolean r = false;
 
-
+    /**
+     * Declaramos la direccion y los controles lógicos del personaje
+     */
     public Teclado() {
         //Jugador 1
         this.arriba = arriba;
@@ -49,6 +51,9 @@ public class Teclado implements KeyListener {
         this.r = r;
     }
 
+    /**
+     * Va a definir que tecla es cada direción, o que funcion tiene
+     */
     public void update(){
 
         //Jugador 1
@@ -72,16 +77,28 @@ public class Teclado implements KeyListener {
         r = keys[KeyEvent.VK_R];         // R
     }
 
+    /**
+     * Para comprobar si la tecla esta presionada
+     * @param e the event to be processed
+     */
     @Override
     public void keyPressed(KeyEvent e) {
         keys[e.getKeyCode()] = true;
     }
 
+    /**
+     * Para comprobar si la tecla no esta presionada
+     * @param e the event to be processed
+     */
     @Override
     public void keyReleased(KeyEvent e) {
         keys[e.getKeyCode()] = false;
     }
 
+    /**
+     *Sirve para imprimr el caracter que hace cuando justo despues de pulsar la tecla la dejamos de pulsar
+     * @param e the event to be processed
+     */
     @Override
     public void keyTyped(KeyEvent e) {
     }
