@@ -1,8 +1,10 @@
 package Menu;
 
+import Partidas.Partidas;
 import input.Teclado;
 import objects.Jugador;
 import java.awt.*;
+import java.util.ArrayList;
 
 public class Menu {
 
@@ -14,6 +16,7 @@ public class Menu {
     private boolean iniciado = false;
     private boolean juegoTerminado = false;
     private boolean reiniciarSolicitado = false;
+    boolean partidaGuardada = false;
 
     public Menu(Teclado teclado) {
         this.teclado = teclado;
@@ -148,16 +151,29 @@ public class Menu {
 
         g.drawString(resultado, (width - fm.stringWidth(resultado)) / 2, 350);
 
-        // Estadísticas
+        // Estadísticas de la partida actual
         g.setFont(new Font("Arial", Font.PLAIN, 25));
         fm = g.getFontMetrics();
         String puntaje1 = "Jugador 1 eliminó: " + jugador1.getEnemigosDerrotados();
         String puntaje2 = "Jugador 2 eliminó: " + jugador2.getEnemigosDerrotados();
         String mensajeReinicio = "Presiona Enter para reiniciar";
+        Partidas p = new Partidas();
+
+        int enemigosJ1 = jugador1.getEnemigosDerrotados(), enemigosJ2 = jugador2.getEnemigosDerrotados();
+        p.guardarPartida(enemigosJ1, enemigosJ2);
+
+        // Obtener puntajes máximos
+        ArrayList<String> datos = p.cargarPartida();
+
+        // Mostrar puntajes máximos
+        String maxPuntajeJ1 = "Máximo puntaje Jugador 1: " + (datos != null && datos.size() > 0 ? datos.get(0) : "0");
+        String maxPuntajeJ2 = "Máximo puntaje Jugador 2: " + (datos != null && datos.size() > 1 ? datos.get(1) : "0");
 
         g.drawString(puntaje1, (width - fm.stringWidth(puntaje1)) / 2, 390);
         g.drawString(puntaje2, (width - fm.stringWidth(puntaje2)) / 2, 420);
-        g.drawString(mensajeReinicio, (width - fm.stringWidth(mensajeReinicio)) / 2, 460);
+        g.drawString(maxPuntajeJ1, (width - fm.stringWidth(maxPuntajeJ1)) / 2, 480);
+        g.drawString(maxPuntajeJ2, (width - fm.stringWidth(maxPuntajeJ2)) / 2, 510);
+        g.drawString(mensajeReinicio, (width - fm.stringWidth(mensajeReinicio)) / 2, 550);
     }
 }
 

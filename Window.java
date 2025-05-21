@@ -235,8 +235,6 @@ public class Window extends JFrame implements Runnable {
             return;
         }
 
-
-
         g = bs.getDrawGraphics();
         // Dibuja la imagen de fondo
         g.drawImage(fondoImagen, 0, 0, width, height, null);

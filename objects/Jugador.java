@@ -7,7 +7,7 @@ import java.awt.image.BufferedImage;
 
 public class Jugador extends ObjetoJuego {
     private int id;
-    private int salud = 10;
+    private int salud = 5;
     private float velocidad = 2.75f;
     private int enemigosDerrotados = 0;
 

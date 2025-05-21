@@ -9,8 +9,6 @@ public class Main {
  * Cosas restantes:
  *
  *  ================ Prioridad ================
- *  - Añadir un fondo.
- *  - Comentar líneas de código.
  *
  *   ================ No prioritarias ================
  *   - Arreglar textos, hacerlos más legibles.
